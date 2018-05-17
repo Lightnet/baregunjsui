@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Welcome p2p app gun.js!</title>
+		<meta name="description" content="A cool thing made with Glitch">
+		<link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- production version, optimized for size and speed -->
+		<!-- development version, includes helpful console warnings 
+		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<script src="/gun.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/gun@0.9.993/gun.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/gun@0.9.993/sea.js"></script>
+		-->
+		<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+		<script>
+			/*
+			var gun = Gun('http://localhost:3000/gun');
+      		window.onload = function() {
+        		console.log(gun);
+        		var user = gun.user();
+        		user.create('alice', 'unsafepassword', function(ack){
+            	// done creating user!
+            	console.log('done');
+        		});
+        		user.auth("test", "test",function(ack){
+          			//console.log(ack);
+          			if(ack.err){
+            			console.log("fail!");
+          			}else{
+	            		console.log("Authorized!");
+          			}
+        		});
+      		};
+      		*/
+    	</script>
+    	<style>
+    	</style>
+  	</head>
+  	<body>
+    	<div id="app"></div>Hello,
+	    <p class="hello">world</p>
+    	<!-- include the Glitch button to show what the webpage is about and
+          to make it easier for folks to view source and remix 
+    	<div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
+    	<script src="https://button.glitch.me/button.js"></script>
+    	-->
+    	<!-- import the webpage's client-side javascript file -->
+    	<script src="/bundle.js"></script>
+  	</body>
+</html>
