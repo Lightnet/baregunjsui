@@ -1,0 +1,14 @@
+body.light {
+	--text-color: white;
+	--bg-color: black;
+}
+//theme dark
+body.dark {
+	--text-color: black;
+	--bg-color: white;
+}
+
+body {
+	background-color: var(--text-color);
+	color: var(--bg-color);
+}
