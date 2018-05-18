@@ -5,7 +5,7 @@
   "name": "baregunjsui",
   "version": "0.0.1",
   "description": "A simple Node app with gundb as a database management system, instantly up and running.",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
     "start": "webpack && babel-node main.js --presets env --host 0.0.0.0",
     "watch": "webpack --watch"
@@ -19,7 +19,6 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "browser-sync": "^2.24.4",
-    "buefy": "^0.6.5",
     "css-loader": "^0.28.11",
     "curl": "^0.1.4",
     "dotenv": "^5.0.1",

@@ -5,11 +5,21 @@ import '../scss/main.scss';
 import $ from 'jquery';
 import 'jquery-ui';
 import 'jquery-ui/themes/base/core.css';
+import 'jquery-ui/themes/base/base.css';
 import 'jquery-ui/themes/base/theme.css';
+import 'jquery-ui/themes/base/controlgroup.css';
+import 'jquery-ui/themes/base/menu.css';
+import 'jquery-ui/themes/base/button.css';
+
 //import 'jquery-ui/themes/base/selectable.css';
 import 'jquery-ui/themes/base/dialog.css';
 import 'jquery-ui/themes/base/button.css';
 import 'jquery-ui/ui/core';
+//import 'jquery-ui/ui/widget';
+//import 'jquery-ui/ui/data';
+//import 'jquery-ui/ui/effect';
+import 'jquery-ui/ui/effects/effect-drop';
+
 //import 'jquery-ui/ui/widgets/selectable';
 import 'jquery-ui/ui/widgets/dialog';
 
@@ -95,21 +105,74 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<p> Grant Access to <label id="whoalias">Null</label> </p>
 	</div>
 	`;
-
+	
+	var html_message = `
+	<div id="togglemessage" class="toggler">
+		<div id="effect" class="ui-widget-content">
+	  		<h3 class="ui-widget-header">Show</h3>
+	  		<p id="displaymessage">
+				Message none.
+	  		</p>
+		</div>
+	</div>
+	`;
+	
 	//#region html view default 
-	$('#app').html( html_dialog_alias + html_dialog_aliaskey +`
-	<span>Themes: </span>
-	<button id="light">Light</button>
-	<button id="dark">Dark</button>
-	<button id="checkuserdata">Is User Session?</button>
-	<br>
-	Alias: <span id="displayAlias"> Null </span>
-	<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
-	<br>
-	<br>
-	<div id="view"></div>
-	`);
+	$('#app').empty().append( html_dialog_alias + html_dialog_aliaskey +`
+	<div id="main" style="position:absolute;top:0px;">
+		<span>Themes: </span>
+		<button id="light">Light</button>
+		<button id="dark">Dark</button>
+		<button id="checkuserdata">Is User Session?</button>
+		<button id="gunconnect">Connect</button>
+		<button id="gundisconnect">Disconnect</button>
+		<button id="buttoneffect">Effect</button>
+		<br>
+		Alias: <span id="displayAlias"> Null </span>
+		<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
+		<br>
+		<br>
+		<div id="view"></div>
+	</div>
+	` + html_message);
 	//#endregion
+
+	function runEffect() {
+		// get effect type from
+		//var selectedEffect = $( "#effectTypes" ).val();
+		var selectedEffect = 'drop';
+		// Most effect types need no options passed by default
+		var options = {};
+		// some effects have required parameters
+		if ( selectedEffect === "scale" ) {
+			options = { percent: 50 };
+		} else if ( selectedEffect === "size" ) {
+			options = { to: { width: 280, height: 185 } };
+		}
+		//console.log('test');
+		// Run the effect
+		//$("#effect").css('zIndex','9999');
+		//console.log($("#effect").css('position')); //static
+		$("#effect").css('position','relative');
+		//$("#effect").show(callback);
+		$("#effect").show( selectedEffect, options, 500, callback );
+		//$( "#effect" ).show( selectedEffect);
+	};
+	//callback function to bring a hidden box back
+    function callback() {
+		//$(this).css('zIndex', '10');
+		setTimeout(function() {
+			$("#effect:visible").removeAttr( "style" ).fadeOut();
+			//$("#toggler").css('z-index', -1);
+			//$("#effect:visible").hide();
+		}, 1000 );
+	};
+	$("#buttoneffect").on("click",()=>{
+		runEffect();
+	});
+	$("#effect").hide();
+
+
 
 	$("#dialog-pub").dialog({
 		resizable: false,
@@ -163,6 +226,42 @@ gun.on('bye', (peer)=>{// peer disconnect
 				console.log("Cancel grant!");
 			}
 		}
+	});
+
+	$('#gunconnect').click(()=>{
+		let peers = gun.back('opt.peers');
+		let url = '';
+		if(location.origin == 'http://localhost:3000'){
+			url ='http://localhost:8080' + '/gun';
+		}else{
+			url = location.origin + '/gun';
+		}
+		if(peers[url] == null){
+			//console.log('null');
+			return;
+		}
+		if(url == '')
+			return;
+		//console.log(peers[url]);
+		if(peers[url].url == null){//if url is null and set url for connect
+			peers[url].url = url;
+			peers[url].wire.onopen();
+			console.log("connect????");
+		}
+	});
+
+	$('#gundisconnect').click(()=>{
+		let peers = gun.back('opt.peers');
+		let url;
+		if(location.origin == 'http://localhost:3000'){
+			url ='http://localhost:8080' + '/gun';
+		}else{
+			url = location.origin + '/gun';
+		}
+		//console.log(peers);
+		peers[url].wire.close();
+		peers[url].url = null;
+		clearTimeout(peers[url].defer);
 	});
 
 	$('#light').click(()=>{
@@ -414,14 +513,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	async function view_privatemessage(){
-		//$('#view').html(html_privatemessage);
 		$('#view').empty().append(html_privatemessage);
 		$('#authback').click(()=>{
 			view_auth();
 		});
-
 		$('#pub').on('keyup', checkuserid);
-
 		$('#send').click(()=>{
 			//console.log("apply");
 			privatemessage($('#pub').val(),$('#message').val());

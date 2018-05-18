@@ -1,20 +1,29 @@
 # baregunjsui
 
 # Information:
-  Design to be simple and to keep the files to bare minimal. By Using jquery and jquery-ui, gun.js and gun.js libraries.
-
- Using the gulp, babel, webpack and other libraries to develop simple database access and message post prototype builds.
+  Design to be simple and to keep the files to bare minimal. By Using jquery and jquery-ui, gun.js and gun.js libraries. The auto build script compiler that is being used for this project is gulp, babel, webpack and other libraries to develop small but compact in some way. The script will have simple server setup. The database is develop mode that not yet config yet for production. Simple access and post message system. The project is to develop simple examples test how gun.js works for peer to peer database with Security, Encryption, and Authorization.
  
 # Features:
- * Private Message Simple
- * SEA.js (Security,Encryption,Authorization)
- * Peer to Peer database as Gun.js.
+ * Private Message (Simple)
+ * SEA.js (Security, Encryption, Authorization) from gun.js
+ * Peer to Peer database from gun.js.
+ * Profile search Alias (Simple)
+ * Login, Sign up, Forgot Password Hint (Simple)
+ * Change Password (Simple)
+ * Chat Message (Not yet added)
+ * To Do List (Not yet added)
+ * ...
+
+# Notes:
+ * This most simple build.
+ * jquery smallest file to helpful script
+ * jquery-ui is tricky to setup since they broken in part to reduce file size good for design.
+ * 
 
 # Project Links:
  * https://glitch.com/edit/#!/baregunjsui
  * https://baregunjsui.glitch.me
  * https://glitch.com/edit/#!/join/ec14bb2a-51d2-46f8-b017-90a225280311
- 
  * https://github.com/Lightnet/baregunjsui
  
 # Links:
