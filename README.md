@@ -1,4 +1,4 @@
-# baregunui
+# baregunjsui
 
 # Information:
   Design to be simple and to keep the files to bare minimal. By Using jquery and jquery-ui, gun.js and gun.js libraries.
