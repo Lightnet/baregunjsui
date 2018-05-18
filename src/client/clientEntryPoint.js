@@ -10,7 +10,6 @@ import 'jquery-ui/themes/base/theme.css';
 import 'jquery-ui/themes/base/controlgroup.css';
 import 'jquery-ui/themes/base/menu.css';
 import 'jquery-ui/themes/base/button.css';
-
 //import 'jquery-ui/themes/base/selectable.css';
 import 'jquery-ui/themes/base/dialog.css';
 import 'jquery-ui/themes/base/button.css';
@@ -19,7 +18,6 @@ import 'jquery-ui/ui/core';
 //import 'jquery-ui/ui/data';
 //import 'jquery-ui/ui/effect';
 import 'jquery-ui/ui/effects/effect-drop';
-
 //import 'jquery-ui/ui/widgets/selectable';
 import 'jquery-ui/ui/widgets/dialog';
 
@@ -78,10 +76,14 @@ console.log(gun);
 gun.on('hi', peer => {//peer connect
 	//console.log('connect peer to',peer);
 	console.log('peer connect!');
+	$('#displaymessage').text('Connect to peer!');
+	runEffect();
 });
 gun.on('bye', (peer)=>{// peer disconnect
 	//console.log('disconnected from', peer);
-	console.log('disconnected from peer!');
+	console.log('Disconnected from peer!');
+	//$('#displaymessage').text('Disconnected from peer!');
+	//runEffect();
 });
 //gun.get('data').once(()=>{console.log("connect!");});
 //gun.get('data').put({text:'text'});
@@ -96,7 +98,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	var html_dialog_aliaskey = `
 	<div id="dialog-pub" title="Alias Public Key:">
-	<p> Public Key: <input id="inputpubkey">  </p>
+	<p> Public Key: <input id="aliaspubkey">  </p>
 	</div>
 	`;
 
@@ -109,7 +111,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	var html_message = `
 	<div id="togglemessage" class="toggler">
 		<div id="effect" class="ui-widget-content">
-	  		<h3 class="ui-widget-header">Show</h3>
+	  		<h3 class="ui-widget-header">Message:</h3>
 	  		<p id="displaymessage">
 				Message none.
 	  		</p>
@@ -118,15 +120,16 @@ gun.on('bye', (peer)=>{// peer disconnect
 	`;
 	
 	//#region html view default 
+	//<button id="buttoneffect">Effect</button>
 	$('#app').empty().append( html_dialog_alias + html_dialog_aliaskey +`
-	<div id="main" style="position:absolute;top:0px;">
+	<div id="main" style="position:absolute;top:0px;left:0px;">
 		<span>Themes: </span>
 		<button id="light">Light</button>
 		<button id="dark">Dark</button>
 		<button id="checkuserdata">Is User Session?</button>
 		<button id="gunconnect">Connect</button>
 		<button id="gundisconnect">Disconnect</button>
-		<button id="buttoneffect">Effect</button>
+		
 		<br>
 		Alias: <span id="displayAlias"> Null </span>
 		<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
@@ -139,7 +142,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	function runEffect() {
 		// get effect type from
-		//var selectedEffect = $( "#effectTypes" ).val();
 		var selectedEffect = 'drop';
 		// Most effect types need no options passed by default
 		var options = {};
@@ -149,14 +151,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 		} else if ( selectedEffect === "size" ) {
 			options = { to: { width: 280, height: 185 } };
 		}
-		//console.log('test');
 		// Run the effect
 		//$("#effect").css('zIndex','9999');
 		//console.log($("#effect").css('position')); //static
 		$("#effect").css('position','relative');
 		//$("#effect").show(callback);
 		$("#effect").show( selectedEffect, options, 500, callback );
-		//$( "#effect" ).show( selectedEffect);
+		//$("#effect").show( selectedEffect);
 	};
 	//callback function to bring a hidden box back
     function callback() {
@@ -167,12 +168,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//$("#effect:visible").hide();
 		}, 1000 );
 	};
+
 	$("#buttoneffect").on("click",()=>{
 		runEffect();
 	});
 	$("#effect").hide();
-
-
 
 	$("#dialog-pub").dialog({
 		resizable: false,
@@ -183,16 +183,16 @@ gun.on('bye', (peer)=>{// peer disconnect
 		buttons: {
 			"Ok": async function() {
 				$(this).dialog( "close" );
-				console.log($("#dialog-pub").data('param_1'));
-				//console.log($('#inputpubkey').val());
-				let to = gun.user($('#inputpubkey').val());
+				let to = gun.user($('#aliaspubkey').val());
 				let who = await to.get('alias').then();
 				$('#whoalias').text(who);
 				console.log('who',who);
-				if(!who)
+				if(!who){
+					$('#displaymessage').text('No Alias!');
+					runEffect();
 					return;
+				}
 				$("#dialog-alias").data('param_1',$("#dialog-pub").data('param_1')); //id name,born,education ,skills
-				$("#dialog-alias").data('param_2',$('#inputpubkey').val()) //key
 				$("#dialog-alias").dialog("open");
 			},
 			Cancel: function() {
@@ -227,26 +227,33 @@ gun.on('bye', (peer)=>{// peer disconnect
 			}
 		}
 	});
-
+	//this does not work correct yet
 	$('#gunconnect').click(()=>{
+		//console.log('connect!?');
 		let peers = gun.back('opt.peers');
+		console.log(peers); //need to call else it will not connect for some reason
 		let url = '';
+		/*
 		if(location.origin == 'http://localhost:3000'){
 			url ='http://localhost:8080' + '/gun';
 		}else{
 			url = location.origin + '/gun';
 		}
-		if(peers[url] == null){
-			//console.log('null');
-			return;
+		*/
+		for(let address in peers){
+			//console.log(address);
+			url = address;
+			break;//first peer url break
 		}
-		if(url == '')
-			return;
-		//console.log(peers[url]);
+		//console.log(gun);
+		if(peers[url] == null)return;
+		if(url == '')return;
+
 		if(peers[url].url == null){//if url is null and set url for connect
+			console.log(peers[url]);
 			peers[url].url = url;
 			peers[url].wire.onopen();
-			console.log("connect????");
+			gun.get('a').put({a:'a'});
 		}
 	});
 
@@ -449,14 +456,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#view').empty().append(html_login);
 		$('#login').click(()=>{
 			//console.log('login...?');
-			//console.log($('#alias').val());
-			//console.log($('#passphrase').val());
 			authalias($('#alias').val(),$('#passphrase').val());
 		});
 		$('#signup').click(()=>{
 			//console.log('signup...?');
-			//console.log($('#alias').val());
-			//console.log($('#passphrase').val());
 			createalias($('#alias').val(),$('#passphrase').val());
 		});
 		$('#forgot').click(()=>{
@@ -584,7 +587,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		user.auth(user.is.alias, old, (ack) => {
 			//console.log(ack);
 			let status = ack.err || "Saved!";
-			console.log(status);
+			$('#displaymessage').text(status);
+			runEffect();
+			//console.log(status);
 		}, {change: pass});
 	}
 
@@ -615,8 +620,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let enc = await Gun.SEA.encrypt(hint, sec);
 		console.log(enc);
 		user.get('hint').put(enc);
-		//let dec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
-		//say = await Gun.SEA.decrypt(say,dec);
+		$('#displaymessage').text('Hint Apply!');
+		runEffect();
 	}
 
 	async function getforgotpasswordhint(){
@@ -660,11 +665,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log(ack);
 			//console.log("created!", ack.pub);
 			if(ack.err){
-				console.log(ack.err);
+				//console.log(ack.err);
+				$('#displaymessage').text(ack.err);
+				runEffect();
 				return;
 			}
 			if(ack.pub){
-				console.log("Login Pass! Pub:", ack.pub);
+				//console.log("Login Pass! Pub:", ack.pub);
+				$('#displaymessage').text('Login Auth!');
+				runEffect();
 				view_auth();
 			}
 		});
@@ -676,10 +685,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log("created!", ack.pub);
 			if(ack.err){
 				console.log(ack.err);
+				$('#displaymessage').text(ack.err);
+				runEffect();
 				return;
 			}
 			if(ack.pub){
 				console.log("Created! pub", ack.pub);
+				$('#displaymessage').text(ack.pub);
+				runEffect();
 			}
 		});
 	}

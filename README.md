@@ -12,13 +12,18 @@
  * Change Password (Simple)
  * Chat Message (Not yet added)
  * To Do List (Not yet added)
+ * Connect gun peer (partly work)
+ * Disconnect gun peer (partly work)
  * ...
 
 # Notes:
  * This most simple build.
  * jquery smallest file to helpful script
- * jquery-ui is tricky to setup since they broken in part to reduce file size good for design.
+ * jquery-ui is tricky to setup since they broken in part to reduce file size good for design. Since we need few scripts and css to keep it simple.
  * 
+
+# Bugs:
+ * Connect and disconnect button is what doesn't work some condtions.
 
 # Project Links:
  * https://glitch.com/edit/#!/baregunjsui
