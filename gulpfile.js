@@ -34,6 +34,15 @@ const commonModulejs = {
             query: {
                 presets: ['babel-preset-env'].map(require.resolve)
             }
+        },
+        {
+            test: /\.(png|jpg|gif)$/,
+            use: [
+                {
+                    loader: 'file-loader',
+                    options: {}
+                }
+            ]
         }
     ]
 }

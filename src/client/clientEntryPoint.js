@@ -3,6 +3,15 @@ localStorage.clear(); //clear database for gun
 
 import '../scss/main.scss';
 import $ from 'jquery';
+import 'jquery-ui';
+import 'jquery-ui/themes/base/core.css';
+import 'jquery-ui/themes/base/theme.css';
+//import 'jquery-ui/themes/base/selectable.css';
+import 'jquery-ui/themes/base/dialog.css';
+import 'jquery-ui/themes/base/button.css';
+import 'jquery-ui/ui/core';
+//import 'jquery-ui/ui/widgets/selectable';
+import 'jquery-ui/ui/widgets/dialog';
 
 //gun.js
 import Gun from 'gun';
@@ -73,20 +82,88 @@ gun.on('bye', (peer)=>{// peer disconnect
 //===============================================
 // SEA.js
 //===============================================
+
+
+	var html_dialog_aliaskey = `
+	<div id="dialog-pub" title="Alias Public Key:">
+	<p> Public Key: <input id="inputpubkey">  </p>
+	</div>
+	`;
+
+	var html_dialog_alias = `
+	<div id="dialog-alias" title="Access Confirm!">
+	<p> Grant Access to <label id="whoalias">Null</label> </p>
+	</div>
+	`;
+
 	//#region html view default 
-	$('#app').html(`
+	$('#app').html( html_dialog_alias + html_dialog_aliaskey +`
 	<span>Themes: </span>
 	<button id="light">Light</button>
 	<button id="dark">Dark</button>
 	<button id="checkuserdata">Is User Session?</button>
 	<br>
-	<span id="displayAlias"> Alias:Null </span>
+	Alias: <span id="displayAlias"> Null </span>
 	<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
 	<br>
 	<br>
 	<div id="view"></div>
 	`);
 	//#endregion
+
+	$("#dialog-pub").dialog({
+		resizable: false,
+		height: "auto",
+		width: 400,
+		modal: true,
+		autoOpen: false,
+		buttons: {
+			"Ok": async function() {
+				$(this).dialog( "close" );
+				console.log($("#dialog-pub").data('param_1'));
+				//console.log($('#inputpubkey').val());
+				let to = gun.user($('#inputpubkey').val());
+				let who = await to.get('alias').then();
+				$('#whoalias').text(who);
+				console.log('who',who);
+				if(!who)
+					return;
+				$("#dialog-alias").data('param_1',$("#dialog-pub").data('param_1')); //id name,born,education ,skills
+				$("#dialog-alias").data('param_2',$('#inputpubkey').val()) //key
+				$("#dialog-alias").dialog("open");
+			},
+			Cancel: function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
+	$("#dialog-alias").dialog({
+		resizable: false,
+		height: "auto",
+		width: 400,
+		modal: true,
+		autoOpen: false,
+		buttons: {
+			"Ok": async function() {
+				$(this).dialog( "close" );
+				/*
+				console.log($(this).data('tag'));
+				//console.log($('#inputpubkey').val());
+				let to = gun.user($('#inputpubkey').val());
+				let who = await to.get('alias').then();
+				//console.log('who',who);
+				if(!who)
+					return;
+				*/
+				console.log("Pass Grant!");
+			},
+			Cancel: function() {
+				$(this).dialog("close");
+				console.log("Cancel grant!");
+			}
+		}
+	});
 
 	$('#light').click(()=>{
 		document.querySelector('body').classList.remove("dark");
@@ -162,9 +239,31 @@ gun.on('bye', (peer)=>{// peer disconnect
 	`;
 	//#endregion
 
-	//#region html view auth
+	var html_aliasprofile = `
+	<br><label>Profile Search:</label><input id="profilesearch" style="width:700px;"><label>Status:</label><label id="searchstatus">None</label>
+	<table><tr><td>
+		<label>Name:</label>
+		</td><td>
+			<input id="aname">
+		</td></tr><tr><td>
+			<label>Born:</label>
+		</td><td>
+			<input id="aborn">
+		</td></tr><tr><td>
+			<label>Education:</label>
+		</td><td>
+			<input id="aeducation">
+		</td></tr><tr><td>
+			<label>Skills:</label>
+		</td><td>
+			<input id="askills">
+		</td></tr>
+	</table>
+	`;
+	
+	//#region html view auth / main area
 	var html_auth = `
-	<button id="logout">Logout</button>
+	<button id="logout" style="float:right;">Logout</button>
 	<button id="passwordhint">Password Hint</button>
 	<button id="changepassword">Change Password</button>
 	<button id="privatemessage">Private Message</button>
@@ -198,7 +297,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			<button id="gskills">+</button>
 		</td></tr>
 	</table>
-	`;
+	` + html_aliasprofile;
 	//#endregion
 
 	//#region html view password hint
@@ -244,12 +343,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<br><label>Old Password:</label> <input id="oldpassword">
 	<br><label>New Password:</label> <input id="newpassword">
 	<br><button id="changepassword">Change</button>
-
-	`
+	`;
 	//#endregion
 
 	function view_login(){
-		$('#view').html(html_login);
+		$('#view').empty().append(html_login);
 		$('#login').click(()=>{
 			//console.log('login...?');
 			//console.log($('#alias').val());
@@ -269,7 +367,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	function view_forgot(){
-		$('#view').html(html_forgot);
+		$('#view').empty().append(html_forgot);
 		
 		$('#backlogin').click(()=>{
 			console.log('backlogin...?');
@@ -282,7 +380,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	async function view_changepassword(){
-		$('#view').html(html_changepasword);
+		$('#view').empty().append(html_changepasword);
 		$('#authback').click(()=>{
 			view_auth();
 		});
@@ -292,7 +390,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	async function view_passwordhint(){
-		$('#view').html(html_passwordhint);
+		$('#view').empty().append(html_passwordhint);
 		$('#authback').click(()=>{
 			view_auth();
 		});
@@ -316,7 +414,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	async function view_privatemessage(){
-		$('#view').html(html_privatemessage);
+		//$('#view').html(html_privatemessage);
+		$('#view').empty().append(html_privatemessage);
 		$('#authback').click(()=>{
 			view_auth();
 		});
@@ -330,7 +429,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	async function view_auth(){
-		$('#view').html(html_auth);
+		$('#view').empty().append(html_auth);
 		$('#alias').text('Alias: '+user.is.alias);
 		$('#publickey').val(user.is.pub);
 		$('#displayAlias').text('Alias: '+user.is.alias);
@@ -339,44 +438,23 @@ gun.on('bye', (peer)=>{// peer disconnect
 			user.leave();
 			view_login();
 		});
+		
+		profilesetdata('name');
+		profilesetdata('born');
+		profilesetdata('education');
+		profilesetdata('skills');
 
-		let name = await user.get('profile').get('name').then();;
-		$('#name').val(name);
-		$('#name').on('keyup', function(e){
-			if(!user.is){ return }
-			user.get('profile').get('name').put($('#name').val());
-		});
-
-		//$('#gname').click(grantid);
-		$('#gname').click(async (e)=>{
-			e.preventDefault();
-			var pub = prompt("What is the Public Key or DID you want to give read access to?");
-			var to = gun.user(pub);
-			var who = await to.get('alias').then();
-			if(!confirm("You want to give access to " + who + "?")){ return }
-			user.get('profile').get('name').grant(to);
-		});
-
-		$('#gborn').click(()=>{
-			console.log('gborn');
-		});
-
-		$('#geducation').click(()=>{
-			console.log('geducation');
-		});
-
-		$('#gskills').click(()=>{
-			console.log('gskills');
-		});
+		profilegrantdata('name');
+		profilegrantdata('born');
+		profilegrantdata('education');
+		profilegrantdata('skills');
 
 		$('#passwordhint').click(()=>{
 			view_passwordhint();
 		});
-
 		$('#privatemessage').click(()=>{
 			view_privatemessage();
 		});
-
 		$('#copykey').click(()=>{
 			$('#publickey').select();
 			document.execCommand("copy");
@@ -384,6 +462,23 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#changepassword').click((e)=>{
 			view_changepassword();
 		})
+
+		$('#profilesearch').on('keyup', searchuserid);
+	}
+
+	async function profilegrantdata(_name){
+		$('#g'+_name).click(()=>{
+			$("#dialog-pub").data('param_1',_name).dialog("open");
+		});
+	}
+
+	async function profilesetdata(_name){
+		let data= await user.get('profile').get(_name).then();;
+		$('#'+_name).val(data);
+		$('#'+_name).on('keyup', function(e){
+			if(!user.is){ return }
+			user.get('profile').get(_name).put($('#'+_name).val());
+		});
 	}
 
 	function changeforgotpassword(){
@@ -493,6 +588,31 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 	}
 
+	async function searchuserid(e){
+		if(!user.is){ return }
+		let pub = $('#profilesearch').val();
+		let to = gun.user(pub);
+		let who = await to.then() || {};
+		$('#searchstatus').text('Status: checking...');
+		if(!who.alias){
+			$('#searchstatus').text('Status: No Alias!');
+			//console.log('none');
+			return;
+		}else{
+			$('#searchstatus').text('Status: Found Alias ' + who.alias + '!' );
+			//console.log('found!');
+		}
+		console.log(who);
+		let data_name = await to.get('profile').get('name').then();
+		$('#aname').val(data_name);
+		let data_born = await to.get('profile').get('born').then();
+		$('#aborn').val(data_born);
+		let data_edu = await to.get('profile').get('education').then();
+		$('#aeducation').val(data_edu);
+		let data_skills = await to.get('profile').get('skills').then();
+		$('#askills').val(data_skills);
+	}
+
 	async function checkuserid(e){
 		if(!user.is){ return }
 		$('#messages').empty();
@@ -574,5 +694,3 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//};
 
 //})();
-
-
