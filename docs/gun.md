@@ -1,11 +1,29 @@
 # Gun
 
+# Information:
+ Gun.js is peer to peer database. Gun.js has many libs to help develop type app like private message, timegraph like real time update feeds from browser, and others.
+
+# Gun.js Libs:
+ * lib/time.js (subscribe real time feeds base on time push into node)
+ * 
+
+Links:
  * https://github.com/amark/gun/wiki/How-to-Sync-Time
- * https://github.com/amark/gun/wiki/Timegraph
+ * https://github.com/amark/gun/wiki/Timegraph timegraph
+ * http://jsbin.com/vazazelinu/edit?js,console,output timegraph
 
 
- .time( function(data, key, time) ) //Subscribes to all future events that occur on the Timegraph
+ ```
+//user.get('contact').map().once(data=>{
+    //console.log(data);
+    //if(data.pub == pub){
+        //console.log(data._['#']);
+        //gun.get(data._['#']).once(d=>{
+            //console.log(d);
+        //})
+        //gun.get(data._['#']).put('null');
+        //console.log("FOUND!");
+    //}
+//});
 
- .time( function(data, key, time), num) // Subscribes to all future events that occur on the Timegraph and retrieve a specified number of old events
-
- .time( data ) //Pushes data to a Timegraph with it's time set to Gun.state()'s time
+ ```

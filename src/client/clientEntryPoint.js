@@ -2,6 +2,9 @@
 localStorage.clear(); //clear database for gun
 
 import '../scss/main.scss';
+import moment from 'moment';
+//import _ from 'lodash';
+import _ from 'lodash/core';
 import $ from 'jquery';
 import 'jquery-ui';
 import 'jquery-ui/themes/base/core.css';
@@ -29,7 +32,6 @@ import 'gun/sea';
 //custom chain gun.js
 import 'gun/nts';
 import 'gun/lib/time';
-
 import 'gun/lib/path';
 import 'gun/lib/load';
 import 'gun/lib/open';
@@ -274,7 +276,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	$('#checkuserdata').click(()=>{
 		//console.log(user);
-		//console.log(user.is);
 		if(user.is){
 			//console.log("auth?");
 			view_auth();
@@ -331,6 +332,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	`;
 	//#endregion
 
+	//#region html contacts
 	var html_contacts = `
 	<select id="contacts">
 		<option disabled selected> Select contact </option>
@@ -338,6 +340,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<button id="contactadd">Add</button>
 	<button id="contactremove">Remove</button>
 	`;
+	//#endregion
 
 	//#region html view Alias Profile 
 	var html_aliasprofile = `
@@ -405,18 +408,24 @@ gun.on('bye', (peer)=>{// peer disconnect
 	` + html_aliasprofile;
 	//#endregion
 
+	//#region html view chat room
 	var html_chatroom = `
 	<button id="authback">Back</button>
 	<div id="messages" style="height:200px;overflow:auto;"></div>
 	<input id="enterchat">
 	<button>Chat</button>
 	`;
+	//#endregion
 
+	//#region html view To Do List
 	var html_todolist = `
 	<button id="authback">Back</button>
 	<br><input id="addtodolist"><button>Add</button>
-	<br><ul id="todolist"></ul>
+	<br><div style="height:200px;overflow:auto;">
+		<ul id="todolist"></ul>
+	</div>
 	`;
+	//#endregion
 
 	//#region html view password hint
 	var html_passwordhint = `
@@ -546,10 +555,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log(id);
 			//user.get('contact').get(id).then();
 			setpubkeyinput(id,'pub');
-
 		});
 
 		$('#contactadd').on('click', addcontact);
+		$('#contactremove').on('click', removecontact);
 	}
 
 	async function view_auth(){
@@ -599,6 +608,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			setpubkeyinput(id,'profilesearch');
 		});
 
+		$('#contactremove').on('click', removecontact);
 		$('#contactadd').on('click', addcontact);
 
 		$('#chatroom').on('click', ()=>{
@@ -676,19 +686,59 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#authback').click(()=>{
 			view_auth();
 		});
-		
+
+		user.get('todolist').map().once((data,id)=>{
+			var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('#todolist');
+			//todolist id
+			console.log("test??");
+			if(li){
+				if((data == null)||(data == 'null')){
+					$(li).hide();	
+				}
+				$(li).empty();
+				$('<input type="checkbox">').text('Done?').appendTo(li);
+				$('<span>').text(data.text).appendTo(li);
+				$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);
+			}else{
+				$(li).hide();	
+			}
+		});
+
 		$('#addtodolist').on("keyup",function(e){
 			//do stuff here
 			e = e || window.event;
 			//console.log(e.keyCode);
 			if (e.keyCode == 13) {
-				let text = ($(this).val() || '').trim();
-				console.log('add?',text);
+				addToDoList();
 				return false;
 			}
 			return true;
 		});	
 	}
+
+	function addToDoList(){
+		let text = ($('#addtodolist').val() || '').trim();
+		console.log('add?',text);
+		user.get('todolist').set({text:text,done:'false'});
+	}
+
+	function removeToDoList(element){
+		let id = $(element).parent().attr('id');
+		//console.log(id);
+		//user.get('todolist').get(id).put(null);
+		user.get('todolist').get(id).put('null',ack=>{
+			//console.log(ack);
+			if(ack.ok){//hide li
+				$(element).parent().hide();
+			}
+		});
+	}
+
+	window.removeToDoList = removeToDoList;
+
+
+
+
 
 	async function setpubkeyinput(id,_name){
 		let who = await user.get('contact').get(id).then() || {};
@@ -707,9 +757,21 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 		let bfound = await user.get('contact').get(who.alias).then();
 		console.log(bfound);
-		if(!bfound){
+		if((!bfound)||(bfound == 'null')){
 			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});
 		}
+	}
+
+	async function removecontact(){
+		console.log("remove");
+		let pub = ($('#profilesearch').val() || '').trim();
+		let to = gun.user(pub);
+		let who = await to.then() || {};
+		if(!who.alias){
+			return;
+		}
+		//user.get('contact').get(who.alias).put('null');//fail sea.js check null?
+		user.get('contact').get(who.alias).put('null');
 	}
 
 	function UpdateContactList(){
