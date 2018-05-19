@@ -1026,6 +1026,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			view_auth();
 			//console.log("auth?");
 		}
+		$("#loading").empty();
 	//};
 
 //})();

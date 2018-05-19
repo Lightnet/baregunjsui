@@ -7,13 +7,10 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-
-		<!--
-		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-		-->
 		<!-- production version, optimized for size and speed -->
 		<!-- development version, includes helpful console warnings 
 		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 		<script src="/gun.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
@@ -23,30 +20,36 @@
 		<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
 		<script>
-			/*
-			var gun = Gun('http://localhost:3000/gun');
-      		window.onload = function() {
-        		console.log(gun);
-        		var user = gun.user();
-        		user.create('alice', 'unsafepassword', function(ack){
-            	// done creating user!
-            	console.log('done');
-        		});
-        		user.auth("test", "test",function(ack){
-          			//console.log(ack);
-          			if(ack.err){
-            			console.log("fail!");
-          			}else{
-	            		console.log("Authorized!");
-          			}
-        		});
-      		};
-      		*/
     	</script>
     	<style>
+			.loader {
+				border: 16px solid #f3f3f3;
+				border-radius: 50%;
+				border-top: 16px solid #3498db;
+				width: 120px;
+				height: 120px;
+				-webkit-animation: spin 2s linear infinite; /* Safari */
+				animation: spin 2s linear infinite;
+			}
+
+			/* Safari */
+			@-webkit-keyframes spin {
+				0% { -webkit-transform: rotate(0deg); }
+				100% { -webkit-transform: rotate(360deg); }
+			}
+
+			@keyframes spin {
+				0% { transform: rotate(0deg); }
+				100% { transform: rotate(360deg); }
+			}
     	</style>
   	</head>
   	<body>
+		<div id="loading">
+		<div class="loader"></div>
+		Loading...
+		</div>
+		
 		<div id="app"></div>
 		<!--
 			Hello,<span class="hello">world</span>

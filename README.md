@@ -20,13 +20,14 @@ Created by: Lightnet
  * SEA.js (Security, Encryption, Authorization) from gun.js
  * Private Message (Simple)
  * Profile search Alias (Simple)
- * Alias Cantacts (Add)
+ * Alias Contacts (Add)
  * Login, Sign up, Forgot Password Hint (Simple)
  * Change Password (Simple)
  * Chat Message (Timegraph)
  * To Do List (work in progress)
  * Connect gun peer (partly work)
  * Disconnect gun peer (partly work)
+ * Simple theme light and dark
 
 # Notes:
  * This most simple build.
