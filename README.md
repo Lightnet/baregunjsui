@@ -1,8 +1,20 @@
 # baregunjsui
 
+Created by: Lightnet
+
+# Required:
+ * nodejs
+ * npm
+
+# Code Languages:
+ * Babeljs es5/6/7 javascript
+ * javascript
+
 # Information:
-  Design to be simple and to keep the files to bare minimal. By Using jquery and jquery-ui, gun.js and gun.js libraries. The auto build script compiler that is being used for this project is gulp, babel, webpack and other libraries to develop small but compact in some way. The script will have simple server setup. The database is develop mode that not yet config yet for production. Simple access and post message system. The project is to develop simple examples test how gun.js works for peer to peer database with Security, Encryption, and Authorization.
- 
+  Design to be simple and to keep the files to bare minimal. To build simple peer to peer database messages system by developing Security, Encryption, and Authorization. By using jquery and jquery-ui, gun.js and gun.js libraries as base line just for client and simple server setup. The project has auto build script compiler that is being used for gulp, babel, webpack and other libraries to develop small but compact file. It can be install npm (node package manager) by command line for easy setup. The database is develop mode that not yet config yet for production. Simple access and post and private message system. The project has some simple examples to how gun.js works for peer to peer database with sea.js.
+
+  Current mode Development / Debug mode that is not config for production yet.
+
 # Features:
  * Private Message (Simple)
  * SEA.js (Security, Encryption, Authorization) from gun.js
@@ -10,8 +22,8 @@
  * Profile search Alias (Simple)
  * Login, Sign up, Forgot Password Hint (Simple)
  * Change Password (Simple)
- * Chat Message (Not yet added)
- * To Do List (Not yet added)
+ * Chat Message (Timegraph)
+ * To Do List (work in progress)
  * Connect gun peer (partly work)
  * Disconnect gun peer (partly work)
  * ...
@@ -39,3 +51,6 @@
  * https://github.com/amark/gun/wiki/Security,-Authentication,-Authorization
  * http://gun.js.org/explainers/data/security.html
  * https://gun.eco/explainers/data/security.html
+
+# Credits:
+ * https://gitter.im/amark/gun chat room browser.

@@ -407,8 +407,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	var html_chatroom = `
 	<button id="authback">Back</button>
-	<div id="messages" style="height:400px;overflow:scroll;"></div>
-	<br><input id="enterchat">
+	<div id="messages" style="height:200px;overflow:auto;"></div>
+	<input id="enterchat">
 	<button>Chat</button>
 	`;
 
@@ -611,6 +611,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 	}
 
+	//Chat Room
 	function view_chatroom(){
 		let chatroom = gun.get('chatroom');
 		$('#view').empty().append(html_chatroom);
@@ -625,27 +626,27 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log('time');
 			//console.log(data);
 			//console.log(key);
-
 			//console.log('gun #key');
 			gun.get(data['#']).once((d,id)=>{
 				//console.log(id);
 				//console.log(d);
-				//$('#messages')
+				//check if id div html element exist
 				var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#messages');
-
 				if(d){
-					if(d == 'null'){
+					if((d == null)||(d == 'null')){
 						$(div).hide();	
-					
 					}
 					$(div).empty();
-					$('<span>').append('Time:' + time + ' ').appendTo(div);
+					//time = moment.unix(time/1000).format('dddd, MMMM Do, YYYY h:mm:ss A')
+					time = moment.unix(time/1000).format('h:mm:ss A')
+					$('<span>').append('[' + time + '] ').appendTo(div);
 					$('<span>').append('Alias:'+ d.alias  + ' > ').appendTo(div);
 					$('<span>').text(d.message).appendTo(div);
+
+					$("#messages").scrollTop($("#messages")[0].scrollHeight);
 				}else{
 					$(div).hide();
 				}
-				
 			});
 
 		}, 20);//limit list
@@ -659,17 +660,17 @@ gun.on('bye', (peer)=>{// peer disconnect
 				let text = ($(this).val() || '').trim();
 				if(!text)
 					return;
-				console.log("enter?");
+				//console.log("enter?");
 				//chatroom.set({alias:user.is.alias,message:text});
 				chatroom.time({alias:user.is.alias,message:text});
 				//chatroom.time(text);
 				return false;
 			}
-
 			return true;
 		 });
 	}
 
+	//To Do List
 	function view_todolist(){
 		$('#view').empty().append(html_todolist);
 
@@ -679,8 +680,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 		
 		$('#addtodolist').on("keyup",function(e){
 			//do stuff here
-			console.log("test?");
-		 });	
+			e = e || window.event;
+			//console.log(e.keyCode);
+			if (e.keyCode == 13) {
+				let text = ($(this).val() || '').trim();
+				console.log('add?',text);
+				return false;
+			}
+			return true;
+		});	
 	}
 
 	async function setpubkeyinput(id,_name){
@@ -1022,4 +1030,3 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//};
 
 //})();
-

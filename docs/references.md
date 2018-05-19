@@ -6,6 +6,7 @@
 # Links:
  * https://www.joezimjs.com/javascript/jquery-html-youre-doing-it-wrong/
  * https://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
+ * https://stackoverflow.com/questions/11715646/scroll-automatically-to-the-bottom-of-the-page
  * 
 
 
