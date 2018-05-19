@@ -39,23 +39,7 @@ import 'gun/lib/unset';
 var SEA = Gun.SEA;
 window.SEA = SEA;
 //console.log(SEA);
-/*
-;(async () => {
-	var SEA = Gun.SEA;
-	var pair = await SEA.pair();
-	var enc = await SEA.encrypt('hello self', pair);
-	var data = await SEA.sign(enc, pair);
-	console.log(data);
-	var msg = await SEA.verify(data, pair);
-	var dec = await SEA.decrypt(msg, pair);
-	var proof = await SEA.work(dec, pair);
-	var check = await SEA.work('hello self', pair);
-	console.log(dec);
-	console.log(proof === check);
-	})();
-	*/
 //localhost 8080 , proxy doesn't work for reason when 8080 > 3000
-
 //(function(){
 	//'use strict';
 	//console.log('hello world :o');
@@ -386,7 +370,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<button id="passwordhint">Password Hint</button>
 	<button id="changepassword">Change Password</button>
 	<button id="privatemessage">Private Message</button>
-	<br><span id="alias"> User Alias</span>
+	<button id="chatroom">Chat Room</button>
+	<button id="todolist">To Do List</button>
+	<br><span id="alias">User Alias</span>
 	<br><span>Public Key: <input id="publickey" style="width:700px;" readonly> </span>
 	<button id="copykey">Copy Key</button>
 	<br>
@@ -418,6 +404,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 	</table>
 	` + html_aliasprofile;
 	//#endregion
+
+	var html_chatroom = `
+	<button id="authback">Back</button>
+	<div id="messages" style="height:400px;overflow:scroll;"></div>
+	<br><input id="enterchat">
+	<button>Chat</button>
+	`;
+
+	var html_todolist = `
+	<button id="authback">Back</button>
+	<br><input id="addtodolist"><button>Add</button>
+	<br><ul id="todolist"></ul>
+	`;
 
 	//#region html view password hint
 	var html_passwordhint = `
@@ -599,10 +598,89 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log(id);
 			//user.get('contact').get(id).then();
 			setpubkeyinput(id,'profilesearch');
-
 		});
 
 		$('#contactadd').on('click', addcontact);
+
+		$('#chatroom').on('click', ()=>{
+			view_chatroom();
+		});
+
+		$('#todolist').on('click', ()=>{
+			view_todolist();
+		});
+	}
+
+	function view_chatroom(){
+		let chatroom = gun.get('chatroom');
+		$('#view').empty().append(html_chatroom);
+
+		//back to auth main
+		$('#authback').click(()=>{
+			chatroom.off();
+			view_auth();
+		});
+
+		chatroom.time((data, key, time)=>{
+			//console.log('time');
+			//console.log(data);
+			//console.log(key);
+
+			//console.log('gun #key');
+			gun.get(data['#']).once((d,id)=>{
+				//console.log(id);
+				//console.log(d);
+				//$('#messages')
+				var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#messages');
+
+				if(d){
+					if(d == 'null'){
+						$(div).hide();	
+					
+					}
+					$(div).empty();
+					$('<span>').append('Time:' + time + ' ').appendTo(div);
+					$('<span>').append('Alias:'+ d.alias  + ' > ').appendTo(div);
+					$('<span>').text(d.message).appendTo(div);
+				}else{
+					$(div).hide();
+				}
+				
+			});
+
+		}, 20);//limit list
+
+		$('#enterchat').on("keyup",function(e){
+			//do stuff here
+			e = e || window.event;
+			//console.log("test?");
+			if (e.keyCode == 13) {
+				//console.log($(this).val());
+				let text = ($(this).val() || '').trim();
+				if(!text)
+					return;
+				console.log("enter?");
+				//chatroom.set({alias:user.is.alias,message:text});
+				chatroom.time({alias:user.is.alias,message:text});
+				//chatroom.time(text);
+				return false;
+			}
+
+			return true;
+		 });
+	}
+
+	function view_todolist(){
+		$('#view').empty().append(html_todolist);
+
+		$('#authback').click(()=>{
+			view_auth();
+		});
+		
+		$('#addtodolist').on("keyup",function(e){
+			//do stuff here
+			console.log("test?");
+		 });	
 	}
 
 	async function setpubkeyinput(id,_name){
@@ -611,31 +689,34 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#'+_name).val(who.pub);
 	}
 
-
 	async function addcontact(){
 		console.log("add contact...");
 		let pub = ($('#profilesearch').val() || '').trim();
-		console.log(pub);
+		//console.log(pub);
 		let to = gun.user(pub);
 		let who = await to.then() || {};
 		if(!who.alias){
 			return;
 		}
-		//console.log(who);
-		//let alias = await user.get('contact').get('test').then();
-		//console.log(alias);
-		user.get('contact').set({alias:who.alias,pub:who.pub});
+		let bfound = await user.get('contact').get(who.alias).then();
+		console.log(bfound);
+		if(!bfound){
+			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});
+		}
 	}
 
 	function UpdateContactList(){
 		//user.get('contact').once().map().once((data,id)=>{
-		user.get('contact').map().once((data,id)=>{
+		user.get('contact').once().map().once((data,id)=>{
+			console.log(data);
+			if(!data.name)
+				return;
 			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');
 			if(data){
 				if(data == 'null'){
 					$(option).hide();	
 				}
-				$(option).text(data.alias);
+				$(option).text(data.name);
 			} else {
 				$(option).hide();
 			}
@@ -773,7 +854,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			$('#searchstatus').text('Status: Found Alias ' + who.alias + '!' );
 			//console.log('found!');
 		}
-		console.log(who);
+		//console.log(who);
 		let data_name = await to.get('profile').get('name').then();
 		$('#aname').val(data_name);
 		let data_born = await to.get('profile').get('born').then();
@@ -941,3 +1022,4 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//};
 
 //})();
+

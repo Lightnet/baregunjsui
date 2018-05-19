@@ -3,6 +3,23 @@
 # Information:
  This just some examples and prototype to build 
 
+```javascript
+;(async () => {
+	var SEA = Gun.SEA;
+	var pair = await SEA.pair();
+	var enc = await SEA.encrypt('hello self', pair);
+	var data = await SEA.sign(enc, pair);
+	console.log(data);
+	var msg = await SEA.verify(data, pair);
+	var dec = await SEA.decrypt(msg, pair);
+	var proof = await SEA.work(dec, pair);
+	var check = await SEA.work('hello self', pair);
+	console.log(dec);
+	console.log(proof === check);
+	})();
+```
+
+
 # Gun.js Sea.js
  * https://gun.eco/docs/SEA
 
