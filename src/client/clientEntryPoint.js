@@ -347,8 +347,18 @@ gun.on('bye', (peer)=>{// peer disconnect
 	`;
 	//#endregion
 
+	var html_contacts = `
+	<select id="contacts">
+		<option disabled selected> Select contact </option>
+	</select>
+	<button id="contactadd">Add</button>
+	<button id="contactremove">Remove</button>
+	`;
+
+	//#region html view Alias Profile 
 	var html_aliasprofile = `
 	<br><label>Profile Search:</label><input id="profilesearch" style="width:700px;"><label>Status:</label><label id="searchstatus">None</label>
+	<br>` + html_contacts + `
 	<table><tr><td>
 		<label>Name:</label>
 		</td><td>
@@ -368,6 +378,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		</td></tr>
 	</table>
 	`;
+	//#endregion
 	
 	//#region html view auth / main area
 	var html_auth = `
@@ -434,6 +445,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	var html_privatemessage = `
 	<button id="authback">Back</button>
 	<br>
+	` + html_contacts + `
 	<br><label>Alias Public Key:</label><input id="pub"><label id="publickeystatus">Status: None</label>
 	<br><label>Private Message:</label><input id="message">
 	<br><label>Action:</label><button id="send">Send</button>
@@ -527,6 +539,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log("apply");
 			privatemessage($('#pub').val(),$('#message').val());
 		});
+
+		UpdateContactList();
+		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
+		$('#contacts').on('change',function(){
+			//var id = $(this).children(":selected").attr("id");
+			var id = $(this).find('option:selected').attr('id');
+			//console.log(id);
+			//user.get('contact').get(id).then();
+			setpubkeyinput(id,'pub');
+
+		});
+
+		$('#contactadd').on('click', addcontact);
 	}
 
 	async function view_auth(){
@@ -539,7 +564,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			user.leave();
 			view_login();
 		});
-		
+
 		profilesetdata('name');
 		profilesetdata('born');
 		profilesetdata('education');
@@ -565,6 +590,56 @@ gun.on('bye', (peer)=>{// peer disconnect
 		})
 
 		$('#profilesearch').on('keyup', searchuserid);
+
+		UpdateContactList();
+		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
+		$('#contacts').on('change',function(){
+			//var id = $(this).children(":selected").attr("id");
+			var id = $(this).find('option:selected').attr('id');
+			//console.log(id);
+			//user.get('contact').get(id).then();
+			setpubkeyinput(id,'profilesearch');
+
+		});
+
+		$('#contactadd').on('click', addcontact);
+	}
+
+	async function setpubkeyinput(id,_name){
+		let who = await user.get('contact').get(id).then() || {};
+		//who.pub
+		$('#'+_name).val(who.pub);
+	}
+
+
+	async function addcontact(){
+		console.log("add contact...");
+		let pub = ($('#profilesearch').val() || '').trim();
+		console.log(pub);
+		let to = gun.user(pub);
+		let who = await to.then() || {};
+		if(!who.alias){
+			return;
+		}
+		//console.log(who);
+		//let alias = await user.get('contact').get('test').then();
+		//console.log(alias);
+		user.get('contact').set({alias:who.alias,pub:who.pub});
+	}
+
+	function UpdateContactList(){
+		//user.get('contact').once().map().once((data,id)=>{
+		user.get('contact').map().once((data,id)=>{
+			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');
+			if(data){
+				if(data == 'null'){
+					$(option).hide();	
+				}
+				$(option).text(data.alias);
+			} else {
+				$(option).hide();
+			}
+		});
 	}
 
 	async function profilegrantdata(_name){
@@ -729,7 +804,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 		//$('#messages').remove();
 		$('#messages').empty();
-		console.log(who);
+		//console.log(who);
 		let dec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
 		user.get('message').get(pub).map().once((say,id)=>{
 			//console.log("user chat");
@@ -753,7 +828,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 				$(li).hide();	
 			}
 			//$(li).text(say + '<button>x</button>');
-			let html = '<span onclick="clickTitle(this)">' + say + '</span>';
+			let html = '<span onclick="clickTitle(this)" style="width:300px;">' + say + '</span>';
 			html = '<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>' + html
 			html += '<button onclick="clickDelete(this)">x</button>'
 			$(li).empty().append(html);
@@ -761,23 +836,23 @@ gun.on('bye', (peer)=>{// peer disconnect
 			$(li).hide();
 		}
 	}
-
+	//span click to change span to input
 	function clickTitle(element){
+		console.log("input init?");
 		element = $(element)
 		if (!element.find('input').get(0)) {
 			element.html('<input value="' + element.html() + '" onkeyup="keypressTitle(this)">')
 		}
 	}
-
+	//input press enter to change to input to span
 	function keypressTitle(element) {
 		if (event.keyCode === 13) {
 			//todos.get($(element).parent().parent().attr('id')).put({title: $(element).val()});
-			//console.log($(element).val());
-			//let val = $(element).val();
+			//get input value
+			let val = $(element).val();
 			element = $(element);
-			if (!element.find('span').get(0)) {
-
-			}
+			//get parent and clear span element child and add text
+			element.parent().empty().text(val);
 		}
 	}
 
@@ -785,12 +860,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//todos.get($(element).parent().attr('id')).put({done: $(element).prop('checked')})
 	}
 
+	//delete message check from User and other Alias
 	function clickDelete(element) {
 		let id = $(element).parent().attr('id');
 		console.log(id);
 		let pub = $('#pub').val();
 		let to = gun.user(pub);
-
+		// current user
 		user.get('message').get(pub).get(id).once((data)=>{
 			console.log(data);
 			//console.log(id);
@@ -804,7 +880,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 				console.log("found!?");
 			}
 		});
-
+		// from Alias
 		to.get('message').get(user.pair().pub).get(id).once((data)=>{
 			//console.log("to chat");
 			if(data!=null){
