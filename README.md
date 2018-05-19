@@ -16,23 +16,23 @@ Created by: Lightnet
   Current mode Development / Debug mode that is not config for production yet.
 
 # Features:
- * Private Message (Simple)
- * SEA.js (Security, Encryption, Authorization) from gun.js
  * Peer to Peer database from gun.js.
+ * SEA.js (Security, Encryption, Authorization) from gun.js
+ * Private Message (Simple)
  * Profile search Alias (Simple)
+ * Alias Cantacts (Add)
  * Login, Sign up, Forgot Password Hint (Simple)
  * Change Password (Simple)
  * Chat Message (Timegraph)
  * To Do List (work in progress)
  * Connect gun peer (partly work)
  * Disconnect gun peer (partly work)
- * ...
 
 # Notes:
  * This most simple build.
  * jquery smallest file to helpful script
  * jquery-ui is tricky to setup since they broken in part to reduce file size good for design. Since we need few scripts and css to keep it simple.
- * 
+ * Not yet config for development and production.
 
 # Bugs:
  * Connect and disconnect button is what doesn't work some condtions.

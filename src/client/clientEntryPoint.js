@@ -458,7 +458,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//#region html view change password
 	var html_changepasword = `
 	<button id="authback">Back</button>
-	<br>
 	<br><label>Old Password:</label> <input id="oldpassword">
 	<br><label>New Password:</label> <input id="newpassword">
 	<br><button id="changepassword">Change</button>
