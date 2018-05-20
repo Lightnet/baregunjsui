@@ -7,6 +7,9 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var Gun = require('gun');
+// Must be added after Gun but before instantiating Gun
+require('gun-mongo');
+
 var helmet = require('helmet');
 
 require('dotenv').config();
@@ -55,7 +58,6 @@ app.get("/fonts/element-icons.woff", function (request, response) {
   response.redirect("https://cdn.glitch.com/94ca57e3-7116-4770-8a69-e0034c332f65%2Felement-icons.woff?1525640368138");
 });
 
-
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (request, response) {
   //response.sendFile(__dirname + '/views/index.html');
@@ -68,11 +70,30 @@ var listener = app.listen(PORT, function () {
   //http://localhost:3000/
   //console.log(listener.address());
 });
+var bdatabase = false;
 
-var gun = Gun({
-  //file: dbFile,
+var gunconfig = {
   web:listener//server express
-});
+}
+
+if(bdatabase){
+  gunconfig.localStorage = false;
+  gunconfig.radisk = false;
+
+  gunconfig.mongo = {
+    host: 'localhost',
+    port: '27017',
+    database: 'gun',
+    collection: 'gun-mongo',
+    query: ''
+  }
+}
+
+//var gun = Gun({
+  //file: dbFile,
+  //web:listener//server express
+//});
+var gun = Gun(gunconfig);
 
 gun.on('hi', peer => {//peer connect
   //console.log('connect peer to',peer);

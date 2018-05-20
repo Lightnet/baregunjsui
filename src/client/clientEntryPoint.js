@@ -113,20 +113,20 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//#region html view default 
 	//<button id="buttoneffect">Effect</button>
 	$('#app').empty().append( html_dialog_alias + html_dialog_aliaskey +`
-	<div id="main" style="position:absolute;top:0px;left:0px;">
-		<span>Themes: </span>
-		<button id="light">Light</button>
-		<button id="dark">Dark</button>
-		<button id="checkuserdata">Is User Session?</button>
-		<button id="gunconnect">Connect</button>
-		<button id="gundisconnect">Disconnect</button>
-		
-		<br>
-		Alias: <span id="displayAlias"> Null </span>
-		<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
-		<br>
-		<br>
-		<div id="view"></div>
+	<div id="main" style="position:absolute;top:0px;left:0px;" class="wrapper1">
+		<div class="container1">
+			<span>Themes: </span>
+			<button id="light">Light</button>
+			<button id="dark">Dark</button>
+			<button id="checkuserdata">Is User Session?</button>
+			<button id="gunconnect">Connect</button>
+			<button id="gundisconnect">Disconnect</button>
+			<br><span id="displayAlias">null</span>
+			<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
+		</div>
+		<div class="container2">
+			<div id="view"></div>
+		</div>
 	</div>
 	` + html_message);
 	//#endregion
@@ -413,10 +413,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	//#region html view chat room
 	var html_chatroom = `
-	<button id="authback">Back</button>
-	<div id="messages" style="height:200px;overflow:auto;"></div>
-	<input id="enterchat">
-	<button>Chat</button>
+	<div style="height:100%;">
+		<button id="authback">Back</button>
+		<div id="messages" style="height:100%;overflow:auto;background-color: gray;"></div>
+		<input id="enterchat">
+		<button>Chat</button>
+		<br>
+		<br>
+	</div>
 	`;
 	//#endregion
 
@@ -455,16 +459,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	//#region html view private message 
 	var html_privatemessage = `
-	<button id="authback">Back</button>
-	<br>
-	` + html_contacts + `
-	<br><label>Alias Public Key:</label><input id="pub"><label id="publickeystatus">Status: None</label>
-	<br><label>Private Message:</label><input id="message">
-	<br><label>Action:</label><button id="send">Send</button>
-	<br>Messages:
-	<div style="height:200px;overflow:auto;">
-	<ul id="messages"></ul>
-	</div>
+	<div style="height:100%;width:100%;" class="parent">
+		<div class="child1">
+			<button id="authback">Back</button>
+			` + html_contacts + `
+			<br><label>Alias Public Key:</label><input id="pub"><label id="publickeystatus">Status: None</label>
+			<br><label>Private Message:</label><input id="message">
+			<br><label>Action:</label><button id="send">Send</button>
+			<br>Messages:
+		</div>
+		<div id="messagelist" class="child2">
+			<ul id="messages"></ul>
+		</div>
+	<div>
 	`;
 	//#endregion
 
@@ -542,6 +549,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	async function view_privatemessage(){
 		$('#view').empty().append(html_privatemessage);
+		//$(".child2").css("max-height", ($(".parent").height()-$(".child1").height()));
+		$(".child2").css("height", ($(".parent").height()-$(".child1").height()));
+
+		$( window ).resize(function() {
+			console.log("resize?");
+			$(".child2").css("height", ($(".parent").height()-$(".child1").height()));
+		});
+
 		$('#authback').click(()=>{
 			view_auth();
 		});
@@ -757,12 +772,12 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//console.log('add?',text);
 		user.get('todolist').set({text:text,done:'false'},ack=>{
 			console.log('todolist:',ack);
+			$('#inputtodolist').val('')//clear text string
 		});
 	}
 
 	function removeToDoList(element){
 		let id = $(element).parent().attr('id');
-		//console.log(id);
 		//user.get('todolist').get(id).put(null);
 		user.get('todolist').get(id).put('null',ack=>{
 			//console.log(ack);
@@ -773,10 +788,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	function todolistCheck (element) {
-		//console.log($(element).prop('checked'));
 		let strbool = $(element).prop('checked');
 		strbool = strbool.toString();
-		//console.log(strbool);
 		user.get('todolist').get($(element).parent().attr('id')).put({done:strbool})
 	}
 	window.todolistTitle = todolistTitle;
@@ -823,7 +836,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	function UpdateContactList(){
-		//user.get('contact').once().map().once((data,id)=>{
 		user.get('contact').once().map().once((data,id)=>{
 			console.log(data);
 			if(!data.name)
@@ -1025,14 +1037,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 			if(say == 'null'){
 				$(li).hide();	
 			}
-			//let html = '<span onclick="clickTitle(this)" style="width:300px;">' + say + '</span>';
-			//html = '<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>' + html
-			//html += '<button onclick="clickDelete(this)">x</button>'
 			$(li).empty();
 			$('<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>').appendTo(li);
 			$('<span onclick="clickTitle(this)">').text(say).appendTo(li);
 			$('<button onclick="clickDelete(this);">').html('x').appendTo(li);
-			//$(li).empty().append(html);
 		} else {
 			$(li).hide();
 		}

@@ -23,3 +23,13 @@ Run this command line to start auto build and server start.
 
 # Notes:
  * Some time it fail to install is that some packages are outdate or os setup or bugs.
+
+ storage/shared/baregunjsui
+
+# database:
+
+## mongod:
+
+```
+"C:\Program Files\MongoDB\Server\3.6\bin\mongod.exe" --dbpath "C:\data\db"
+```

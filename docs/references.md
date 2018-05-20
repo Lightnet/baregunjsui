@@ -7,6 +7,8 @@
  * https://www.joezimjs.com/javascript/jquery-html-youre-doing-it-wrong/
  * https://stackoverflow.com/questions/6524288/jquery-event-for-user-pressing-enter-in-a-textbox
  * https://stackoverflow.com/questions/11715646/scroll-automatically-to-the-bottom-of-the-page
+ * https://stackoverflow.com/questions/27784727/how-to-make-child-div-scrollable-when-it-exceeds-parent-height
+ * http://jsfiddle.net/m9goxrbk/ resize parent child1 child2
  * 
 
 
