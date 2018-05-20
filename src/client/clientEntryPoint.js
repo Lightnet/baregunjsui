@@ -25,24 +25,27 @@ import 'jquery-ui/ui/effects/effect-drop';
 import 'jquery-ui/ui/widgets/dialog';
 
 //gun.js
-//import Gun from 'gun';
-import Gun from 'gun/gun';
+//import Gun from 'gun';//node
+import Gun from 'gun/gun';//browser
 import 'gun/sea';
 
 //custom chain gun.js
 import 'gun/nts';
 import 'gun/lib/time';
 import 'gun/lib/path';
-import 'gun/lib/load';
-import 'gun/lib/open';
+//import 'gun/lib/load';
+//import 'gun/lib/open';
 import 'gun/lib/then';
-import 'gun/lib/unset';
+//import 'gun/lib/unset';
 
-var SEA = Gun.SEA;
-window.SEA = SEA;
+function init(){
+	console.log(SEA);
+	var SEA = Gun.SEA;
+	window.SEA = SEA;
 //console.log(SEA);
 //localhost 8080 , proxy doesn't work for reason when 8080 > 3000
 //(function(){
+
 	//'use strict';
 	//console.log('hello world :o');
 var gun;
@@ -459,7 +462,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<br><label>Private Message:</label><input id="message">
 	<br><label>Action:</label><button id="send">Send</button>
 	<br>Messages:
-	<div>
+	<div style="height:200px;overflow:auto;">
 	<ul id="messages"></ul>
 	</div>
 	`;
@@ -558,8 +561,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 			setpubkeyinput(id,'pub');
 		});
 
-		$('#contactadd').on('click', addcontact);
-		$('#contactremove').on('click', removecontact);
+		$('#contactadd').on('click', ()=>{addcontact('pub')});
+		$('#contactremove').on('click',()=>{removecontact('pub')});
 	}
 
 	async function view_auth(){
@@ -609,8 +612,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 			setpubkeyinput(id,'profilesearch');
 		});
 
-		$('#contactremove').on('click', removecontact);
-		$('#contactadd').on('click', addcontact);
+		$('#contactremove').on('click', ()=>{removecontact('profilesearch')});
+		$('#contactadd').on('click', ()=>{addcontact('profilesearch')});
 
 		$('#chatroom').on('click', ()=>{
 			view_chatroom();
@@ -787,9 +790,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#'+_name).val(who.pub);
 	}
 
-	async function addcontact(){
+	async function addcontact(_id){
 		console.log("add contact...");
-		let pub = ($('#profilesearch').val() || '').trim();
+		//let pub = ($('#profilesearch').val() || '').trim();
+		let pub = ($('#'+_id).val() || '').trim();
 		//console.log(pub);
 		let to = gun.user(pub);
 		let who = await to.then() || {};
@@ -799,18 +803,21 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let bfound = await user.get('contact').get(who.alias).then();
 		console.log(bfound);
 		if((!bfound)||(bfound == 'null')){
+			$('<option>').attr('id', who.alias).text(who.alias).appendTo('#contacts');
 			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});
 		}
 	}
 
-	async function removecontact(){
+	async function removecontact(_id){
 		console.log("remove");
-		let pub = ($('#profilesearch').val() || '').trim();
+		//let pub = ($('#profilesearch').val() || '').trim();
+		let pub = ($('#'+_id).val() || '').trim();
 		let to = gun.user(pub);
 		let who = await to.then() || {};
 		if(!who.alias){
 			return;
 		}
+		$('#'+who.alias).remove();
 		//user.get('contact').get(who.alias).put('null');//fail sea.js check null?
 		user.get('contact').get(who.alias).put('null');
 	}
@@ -1011,18 +1018,21 @@ gun.on('bye', (peer)=>{// peer disconnect
 	// Display Private Message
 	async function UI(say, id, dec){
 		say = await Gun.SEA.decrypt(say,dec);
-		//console.log(say);
+		console.log(say);
 		//this.messages.push({id:id,message:say});
 		var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul');
 		if(say){
 			if(say == 'null'){
 				$(li).hide();	
 			}
-			//$(li).text(say + '<button>x</button>');
-			let html = '<span onclick="clickTitle(this)" style="width:300px;">' + say + '</span>';
-			html = '<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>' + html
-			html += '<button onclick="clickDelete(this)">x</button>'
-			$(li).empty().append(html);
+			//let html = '<span onclick="clickTitle(this)" style="width:300px;">' + say + '</span>';
+			//html = '<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>' + html
+			//html += '<button onclick="clickDelete(this)">x</button>'
+			$(li).empty();
+			$('<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>').appendTo(li);
+			$('<span onclick="clickTitle(this)">').text(say).appendTo(li);
+			$('<button onclick="clickDelete(this);">').html('x').appendTo(li);
+			//$(li).empty().append(html);
 		} else {
 			$(li).hide();
 		}
@@ -1059,7 +1069,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let to = gun.user(pub);
 		// current user
 		user.get('message').get(pub).get(id).once((data)=>{
-			console.log(data);
+			//console.log(data);
 			//console.log(id);
 			if(data!=null){
 				user.get('message').get(pub).get(id).put('null',ack=>{
@@ -1131,3 +1141,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$("#loading").empty();//empty element html when finish loading javascript...
 	//};
 //})();
+
+}
+
+window.addEventListener('load',init);
+//window.onload = function() {
+	//init();
+//};

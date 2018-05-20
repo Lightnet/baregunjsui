@@ -30,7 +30,7 @@ Created by: Lightnet
  * Simple theme light and dark
  * Added simple loading screen since javascript take a while to load.
 
-This just single file build. Line count +1083.
+This just single file build. Line count +1150.
 
 # Notes:
  * This most simple build.
