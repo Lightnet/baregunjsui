@@ -562,6 +562,20 @@ gun.on('bye', (peer)=>{// peer disconnect
 			view_auth();
 		});
 		$('#pub').on('keyup', checkuserid);
+		$('#message').on('keyup',(e)=>{
+			e = e || window.event;
+			if (e.keyCode == 13) {//enter key
+				console.log("message enter");
+				let text = ($('#message').val() || '').trim();
+				if(!text){
+					return true;	
+				}
+				privatemessage($('#pub').val(),$('#message').val());
+
+				return false;
+			}
+			return true;
+		});
 		$('#send').click(()=>{
 			//console.log("apply");
 			privatemessage($('#pub').val(),$('#message').val());
@@ -1058,6 +1072,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 			$('<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>').appendTo(li);
 			$('<span onclick="clickTitle(this)">').text(say).appendTo(li);
 			$('<button onclick="clickDelete(this);">').html('x').appendTo(li);
+
+			$("#messagelist").scrollTop($("#messagelist")[0].scrollHeight);
 		} else {
 			$(li).hide();
 		}
@@ -1168,7 +1184,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 //})();
 
 }
-
 window.addEventListener('load',init);
 //window.onload = function() {
 	//init();
