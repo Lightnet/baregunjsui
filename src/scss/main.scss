@@ -19,11 +19,11 @@ body {
 	background-color: var(--text-color);
 	color: var(--bg-color);
 	//position:relative;
-	height: 100%;
+	//height: 100%;
 }
 
 .toggler {
-	//width: 200px; 
+	width: 400px;
 	//height: 200px;
 }
 
@@ -41,12 +41,12 @@ body {
 }
 .container1 { 
     width: 100%; 
-    height: 48px; 
+    height: 48px;
     //background: green;
 }
 .container2 { 
-    width: 100%; 
-    height: 90%; 
+    width: 100%;
+    height: 90%;
     //background: red;
 }
 
@@ -57,14 +57,15 @@ body {
 }
 
 #main{
-	//position:relative;
+	position:absolute;
 	width: 100%; 
 	height: 100%;
+	top:0px;
+	left:0px;
 }
 
 #view{
-	//position:relative;
-	//width: 100%;
+	width: 100%;
 	height: 100%;
 }
 
@@ -73,22 +74,21 @@ body {
 	//width:100%;
 	//width:100px;
 	//height:100%;
-	//overflow:auto;
+	overflow:auto;
 	background-color: gray;
 }
 
 .parent {
     //width: 250px;
     //height: 300px;
-    //border: 1px solid black;
-    
+    border: 1px solid black;
 }
 .child1 {
-    //background-color: red;
+    background-color: red;
     overflow: hidden;
 }
 
 .child2 {
-    //background-color: blue;
+    background-color: blue;
     overflow: auto;
 }

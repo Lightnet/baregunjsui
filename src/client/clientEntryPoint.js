@@ -23,12 +23,10 @@ import 'jquery-ui/ui/core';
 import 'jquery-ui/ui/effects/effect-drop';
 //import 'jquery-ui/ui/widgets/selectable';
 import 'jquery-ui/ui/widgets/dialog';
-
 //gun.js
 //import Gun from 'gun';//node
 import Gun from 'gun/gun';//browser
 import 'gun/sea';
-
 //custom chain gun.js
 import 'gun/nts';
 import 'gun/lib/time';
@@ -39,13 +37,12 @@ import 'gun/lib/then';
 //import 'gun/lib/unset';
 
 function init(){
-	console.log(SEA);
+	//console.log(SEA);
 	var SEA = Gun.SEA;
 	window.SEA = SEA;
-//console.log(SEA);
-//localhost 8080 , proxy doesn't work for reason when 8080 > 3000
+	//console.log(SEA);
+	//localhost 8080 , proxy doesn't work for reason when 8080 > 3000
 //(function(){
-
 	//'use strict';
 	//console.log('hello world :o');
 var gun;
@@ -77,10 +74,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 });
 //gun.get('data').once(()=>{console.log("connect!");});
 //gun.get('data').put({text:'text'});
-//gun.get('@').time((data, key, time)=>{ // subscribe to all incoming posts
-	//console.log(data);
-    // data might be a soul that you have to GET, I haven't made `time` be chainable yet
-//}, 99); // grab the last 99 items
 //===============================================
 // SEA.js
 //===============================================
@@ -113,9 +106,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//#region html view default 
 	//<button id="buttoneffect">Effect</button>
 	$('#app').empty().append( html_dialog_alias + html_dialog_aliaskey +`
-	<div id="main" style="position:absolute;top:0px;left:0px;" class="wrapper1">
-		<div class="container1">
-			<span>Themes: </span>
+	<div id="main">
+		<div id="navtopbar" style="height:auto;">
+			<span>Themes:</span>
 			<button id="light">Light</button>
 			<button id="dark">Dark</button>
 			<button id="checkuserdata">Is User Session?</button>
@@ -124,12 +117,17 @@ gun.on('bye', (peer)=>{// peer disconnect
 			<br><span id="displayAlias">null</span>
 			<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
 		</div>
-		<div class="container2">
-			<div id="view"></div>
-		</div>
+		<div id="view"></div>
 	</div>
 	` + html_message);
 	//#endregion
+	//fixed scroll?
+	$("#view").css("height", ($("#main").height()-$("#navtopbar").height()));
+	$( window ).resize(function() {
+		console.log("resize?");
+		//child2 > parent > child1
+		$("#view").css("height", ($("#main").height()-$("#navtopbar").height()));
+	});
 
 	function runEffect() {
 		// get effect type from
@@ -413,13 +411,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	//#region html view chat room
 	var html_chatroom = `
-	<div style="height:100%;">
-		<div>
-			<button id="authback">Back</button>
+	<div id="chatroom_parent" style="height:100%;width:100%;">
+		<div id="messages" style="height:100%;overflow:auto;">
 		</div>
-		<div id="messages" style="height:100%;overflow:auto;background-color: gray;"></div>
-		<div>
-			<input id="enterchat"><button>Chat</button>
+		<div id="chatbox" style="height:auto;">
+			<input id="enterchat"><button>Chat</button><button id="authback">Back</button>
 		</div>
 	</div>
 	`;
@@ -427,11 +423,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	//#region html view To Do List
 	var html_todolist = `
-	<button id="authback">Back</button>
-	<br>To Do List:
-	<br><input id="inputtodolist"><button id="addtodolist">Add</button>
-	<br><div style="height:200px;overflow:auto;">
-		<ul id="todolist"></ul>
+	<div id="todolist_parent" style="height:100%;width:100%;">
+		<div id="todolist_child1">
+			<button id="authback">Back</button>
+			<br>To Do List:
+			<br><input id="inputtodolist"><button id="addtodolist">Add</button>
+		</div>
+		<div id="todolist_child2" style="overflow:auto;">
+			<ul id="todolist"></ul>
+		</div>
 	</div>
 	`;
 	//#endregion
@@ -460,8 +460,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	//#region html view private message 
 	var html_privatemessage = `
-	<div style="height:100%;width:100%;" class="parent">
-		<div class="child1">
+	<div id="messsage_parent" style="height:100%;width:100%;">
+		<div id="messsage_child1">
 			<button id="authback">Back</button>
 			` + html_contacts + `
 			<br><label>Alias Public Key:</label><input id="pub"><label id="publickeystatus">Status: None</label>
@@ -469,7 +469,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			<br><label>Action:</label><button id="send">Send</button>
 			<br>Messages:
 		</div>
-		<div id="messagelist" class="child2">
+		<div id="messagelist">
 			<ul id="messages"></ul>
 		</div>
 	<div>
@@ -551,11 +551,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 	async function view_privatemessage(){
 		$('#view').empty().append(html_privatemessage);
 		//$(".child2").css("max-height", ($(".parent").height()-$(".child1").height()));
-		$(".child2").css("height", ($(".parent").height()-$(".child1").height()));
+		$("#messagelist").css("height", ($("#messsage_parent").height()-$("#messsage_child1").height()));
 
 		$( window ).resize(function() {
 			console.log("resize?");
-			$(".child2").css("height", ($(".parent").height()-$(".child1").height()));
+			$("#messagelist").css("height", ($("#messsage_parent").height()-$("#messsage_child1").height()));
 		});
 
 		$('#authback').click(()=>{
@@ -645,6 +645,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let chatroom = gun.get('chatroom');
 		$('#view').empty().append(html_chatroom);
 
+		$("#messages").css("height", ($("#chatroom_parent").height()-$("#chatbox").height()));
+
+		$( window ).resize(function() {
+			console.log("resize?");
+			$("#messages").css("height", ($("#chatroom_parent").height()-$("#chatbox").height()));
+		});
+
 		//back to auth main
 		$('#authback').click(()=>{
 			chatroom.off();
@@ -702,6 +709,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//To Do List
 	function view_todolist(){
 		$('#view').empty().append(html_todolist);
+		//todolist_parent
+		$("#todolist_child2").css("height", ($("#todolist_parent").height()-$("#todolist_child1").height()));
+
+		$( window ).resize(function() {
+			console.log("resize?");
+			$("#todolist_child2").css("height", ($("#todolist_parent").height()-$("#todolist_child1").height()));
+		});
+
+
 		$('#authback').click(()=>{
 			user.get('todolist').off(); //does it turn off?
 			view_auth();
