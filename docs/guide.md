@@ -26,6 +26,15 @@ Run this command line to start auto build and server start.
 
  storage/shared/baregunjsui
 
+# .env
+
+The file .env is for config since linux work on this config but for window it neeed to be install package to make it work.
+
+```
+DatabaseFile='./data.json'
+BDatabase=true
+```
+
 # database:
 
 ## mongod:

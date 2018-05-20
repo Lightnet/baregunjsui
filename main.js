@@ -9,7 +9,6 @@ var app = express();
 var Gun = require('gun');
 // Must be added after Gun but before instantiating Gun
 require('gun-mongo');
-
 var helmet = require('helmet');
 
 require('dotenv').config();
@@ -70,25 +69,26 @@ var listener = app.listen(PORT, function () {
   //http://localhost:3000/
   //console.log(listener.address());
 });
-var bdatabase = false;
-
+var bdatabase = process.env.BDatabase || false;
+console.log("bdatabase:",bdatabase);
+console.log(typeof(bdatabase))
+//gun config here for database if need to be added.
 var gunconfig = {
   web:listener//server express
 }
-
-if(bdatabase){
+gunconfig.file=process.env.DatabaseFile || './data.json';
+if(bdatabase =='true'){
   gunconfig.localStorage = false;
   gunconfig.radisk = false;
-
   gunconfig.mongo = {
-    host: 'localhost',
-    port: '27017',
-    database: 'gun',
-    collection: 'gun-mongo',
+    host: process.env.DBHost || 'localhost',
+    port:process.env.DBPort  || '27017',
+    database: process.env.DBName  || 'gun',
+    collection: process.env.DBCollection  || 'gun-mongo',
     query: ''
   }
+  console.log("init database setup???");
 }
-
 //var gun = Gun({
   //file: dbFile,
   //web:listener//server express

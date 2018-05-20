@@ -120,7 +120,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			<button id="dark">Dark</button>
 			<button id="checkuserdata">Is User Session?</button>
 			<button id="gunconnect">Connect</button>
-			<button id="gundisconnect">Disconnect</button>
+			<button id="gundisconnect">Disconnect</button><button id="buttoneffect">Effect</button>
 			<br><span id="displayAlias">null</span>
 			<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
 		</div>
@@ -414,12 +414,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//#region html view chat room
 	var html_chatroom = `
 	<div style="height:100%;">
-		<button id="authback">Back</button>
+		<div>
+			<button id="authback">Back</button>
+		</div>
 		<div id="messages" style="height:100%;overflow:auto;background-color: gray;"></div>
-		<input id="enterchat">
-		<button>Chat</button>
-		<br>
-		<br>
+		<div>
+			<input id="enterchat"><button>Chat</button>
+		</div>
 	</div>
 	`;
 	//#endregion
