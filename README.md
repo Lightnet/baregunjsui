@@ -24,7 +24,7 @@ Created by: Lightnet
  * Login, Sign up, Forgot Password Hint (Simple)
  * Change Password (Simple)
  * Chat Message (Timegraph)
- * To Do List (Add / Remove)
+ * To Do List (Add / Edit /Remove) (user auth not working / gun working)
  * Connect gun peer (partly work)
  * Disconnect gun peer (partly work)
  * Simple theme light and dark

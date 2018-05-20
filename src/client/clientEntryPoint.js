@@ -683,47 +683,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//To Do List
 	function view_todolist(){
 		$('#view').empty().append(html_todolist);
-
 		$('#authback').click(()=>{
-			user.get('todolist').off();
+			user.get('todolist').off(); //does it turn off?
 			view_auth();
 		});
-
-		console.log("todolist?? get???");
-
 		$('#todolist').empty();
-
-		user.get('todolist').map().on((data,id)=>{
-			let li;
-			console.log(id);
-			if($("#" + id).length == 0) {
-				li = $('<li>').attr('id', id).appendTo('#todolist');
-			}else{
-				li = $("#" + id);
-			}
-				//li = $('#' + id).get(0);
-			//}else{
-				//li = $('<li>').attr('id', id).appendTo('#todolist');
-			//}
-			//li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('#todolist');
-			//todolist id
-			console.log("test??");
-			if(li){
-				if((data == null)||(data == 'null')){
-					$(li).hide();	
-				}
-				$(li).empty();
-				//console.log(data.done);
-				let bdone = false;
-				if(data.done == 'true'){bdone = true;}
-				$('<input type="checkbox" onclick="todolistCheck(this)" ' + (bdone ? 'checked' : '') + '>').appendTo(li);
-				$('<span onclick="todolistTitle(this)">').text(data.text).appendTo(li);
-				$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);
-			}else{
-				$(li).hide();	
-			}
+		user.get('todolist').map().on(async (data,id)=>{
+			feedtodolist(data,id);
 		});
-
 		$('#inputtodolist').on("keyup",function(e){
 			//do stuff here
 			e = e || window.event;
@@ -737,8 +704,33 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#addtodolist').click(addToDoList);
 	}
 
+	function feedtodolist(data,id){
+		let li;
+		//console.log(id);
+		if(document.getElementById(id)){//check for id exist
+			li = $('#' + id).get(0);//call li id
+		}else{
+			li = $('<li>').attr('id', id).appendTo('ul');//create new li
+		}
+		
+		if(li){
+			if((data == null)||(data == 'null')){
+				$(li).hide();	
+			}
+			$(li).empty();
+			//console.log(data.done);
+			let bdone = false;
+			if(data.done == 'true'){bdone = true;}
+			$('<input type="checkbox" onclick="todolistCheck(this)" ' + (bdone ? 'checked' : '') + '>').appendTo(li);
+			$('<span onclick="todolistTitle(this)">').text(data.text).appendTo(li);
+			$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);
+		}else{
+			$(li).hide();	
+		}
+	}
+
 	function todolistTitle(element){
-		console.log("input init?");
+		//console.log("input init?");
 		element = $(element)
 		if (!element.find('input').get(0)) {
 			element.html('<input value="' + element.html() + '" onkeyup="keypressToDoListTitle(this)">')
@@ -747,7 +739,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	function keypressToDoListTitle(element) {
 		if (event.keyCode === 13) {
-			console.log("enter?");
+			//console.log("enter?");
 			user.get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});
 			//get input value
 			let val = $(element).val();
@@ -759,7 +751,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	function addToDoList(){
 		let text = ($('#inputtodolist').val() || '').trim();
-		console.log('add?',text);
+		//console.log('add?',text);
 		user.get('todolist').set({text:text,done:'false'},ack=>{
 			console.log('todolist:',ack);
 		});
