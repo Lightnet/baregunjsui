@@ -420,7 +420,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//#region html view To Do List
 	var html_todolist = `
 	<button id="authback">Back</button>
-	<br><input id="addtodolist"><button>Add</button>
+	<br>To Do List:
+	<br><input id="inputtodolist"><button id="addtodolist">Add</button>
 	<br><div style="height:200px;overflow:auto;">
 		<ul id="todolist"></ul>
 	</div>
@@ -684,11 +685,27 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#view').empty().append(html_todolist);
 
 		$('#authback').click(()=>{
+			user.get('todolist').off();
 			view_auth();
 		});
 
-		user.get('todolist').map().once((data,id)=>{
-			var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('#todolist');
+		console.log("todolist?? get???");
+
+		$('#todolist').empty();
+
+		user.get('todolist').map().on((data,id)=>{
+			let li;
+			console.log(id);
+			if($("#" + id).length == 0) {
+				li = $('<li>').attr('id', id).appendTo('#todolist');
+			}else{
+				li = $("#" + id);
+			}
+				//li = $('#' + id).get(0);
+			//}else{
+				//li = $('<li>').attr('id', id).appendTo('#todolist');
+			//}
+			//li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('#todolist');
 			//todolist id
 			console.log("test??");
 			if(li){
@@ -696,15 +713,18 @@ gun.on('bye', (peer)=>{// peer disconnect
 					$(li).hide();	
 				}
 				$(li).empty();
-				$('<input type="checkbox">').text('Done?').appendTo(li);
-				$('<span>').text(data.text).appendTo(li);
+				//console.log(data.done);
+				let bdone = false;
+				if(data.done == 'true'){bdone = true;}
+				$('<input type="checkbox" onclick="todolistCheck(this)" ' + (bdone ? 'checked' : '') + '>').appendTo(li);
+				$('<span onclick="todolistTitle(this)">').text(data.text).appendTo(li);
 				$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);
 			}else{
 				$(li).hide();	
 			}
 		});
 
-		$('#addtodolist').on("keyup",function(e){
+		$('#inputtodolist').on("keyup",function(e){
 			//do stuff here
 			e = e || window.event;
 			//console.log(e.keyCode);
@@ -713,13 +733,36 @@ gun.on('bye', (peer)=>{// peer disconnect
 				return false;
 			}
 			return true;
-		});	
+		});
+		$('#addtodolist').click(addToDoList);
+	}
+
+	function todolistTitle(element){
+		console.log("input init?");
+		element = $(element)
+		if (!element.find('input').get(0)) {
+			element.html('<input value="' + element.html() + '" onkeyup="keypressToDoListTitle(this)">')
+		}
+	}
+
+	function keypressToDoListTitle(element) {
+		if (event.keyCode === 13) {
+			console.log("enter?");
+			user.get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});
+			//get input value
+			let val = $(element).val();
+			element = $(element);
+			//get parent and clear span element child and add text
+			element.parent().empty().text(val);
+		}
 	}
 
 	function addToDoList(){
-		let text = ($('#addtodolist').val() || '').trim();
+		let text = ($('#inputtodolist').val() || '').trim();
 		console.log('add?',text);
-		user.get('todolist').set({text:text,done:'false'});
+		user.get('todolist').set({text:text,done:'false'},ack=>{
+			console.log('todolist:',ack);
+		});
 	}
 
 	function removeToDoList(element){
@@ -734,11 +777,17 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 	}
 
+	function todolistCheck (element) {
+		//console.log($(element).prop('checked'));
+		let strbool = $(element).prop('checked');
+		strbool = strbool.toString();
+		//console.log(strbool);
+		user.get('todolist').get($(element).parent().attr('id')).put({done:strbool})
+	}
+	window.todolistTitle = todolistTitle;
+	window.keypressToDoListTitle = keypressToDoListTitle;
 	window.removeToDoList = removeToDoList;
-
-
-
-
+	window.todolistCheck = todolistCheck;
 
 	async function setpubkeyinput(id,_name){
 		let who = await user.get('contact').get(id).then() || {};
@@ -1055,7 +1104,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 	window.clickCheck = clickCheck;
 	window.clickDelete = clickDelete;
 
-
 	// Private Message
 	async function privatemessage(_pubkey,_message){
 		if(!user.is){ return }
@@ -1088,7 +1136,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 			view_auth();
 			//console.log("auth?");
 		}
-		$("#loading").empty();
+		$("#loading").empty();//empty element html when finish loading javascript...
 	//};
-
 //})();
