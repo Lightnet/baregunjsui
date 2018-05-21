@@ -63,14 +63,12 @@ console.log(gun);
 gun.on('hi', peer => {//peer connect
 	//console.log('connect peer to',peer);
 	console.log('peer connect!');
-	$('#displaymessage').text('Connect to peer!');
-	runEffect();
+	displayeffectmessage('Connect to peer!');
 });
 gun.on('bye', (peer)=>{// peer disconnect
 	//console.log('disconnected from', peer);
 	console.log('Disconnected from peer!');
-	//$('#displaymessage').text('Disconnected from peer!');
-	//runEffect();
+	//displayeffectmessage('Disconnected from peer!');
 });
 //gun.get('data').once(()=>{console.log("connect!");});
 //gun.get('data').put({text:'text'});
@@ -124,12 +122,16 @@ gun.on('bye', (peer)=>{// peer disconnect
 	` + html_message);
 	//#endregion
 	//fixed scroll?
-	$("#view").css("height", ($("#main").height()-$("#navtopbar").height()));
-	$( window ).resize(function() {
-		//child2 > parent > child1
-		$("#view").css("height", ($("#main").height()-$("#navtopbar").height()));
-	});
-
+	function setupscrollparentc1c2(_parent,_child1,_child2){
+		$("#"+_child2).css("height", ($('#'+_parent).height()-$("#"+_child1).height()));
+		$( window ).resize(function() {
+			//child2 > parent > child1
+			$("#"+_child2).css("height", ($('#'+_parent).height()-$("#"+_child1).height()));
+		});
+	}
+	//setup scroll for main area render
+	setupscrollparentc1c2("main","navtopbar","view");
+	//jquery effect drop down center
 	function runEffect() {
 		// get effect type from
 		var selectedEffect = 'drop';
@@ -141,31 +143,28 @@ gun.on('bye', (peer)=>{// peer disconnect
 		} else if ( selectedEffect === "size" ) {
 			options = { to: { width: 280, height: 185 } };
 		}
-		//options = {direction: "right"};
 		options = {direction: "up"};//Blind effect's direction option now supports up, down, left, and right
 		// Run the effect
-		//$("#effect").css('zIndex','9999');
 		//console.log($("#effect").css('position')); //static
 		$("#effect").css('position','relative');
-		//$("#effect").show(callback);
-		$("#effect").show( selectedEffect, options, 500, callback );
-		//$("#effect").show( selectedEffect);
+		$("#effect").show( selectedEffect, options, 500, callbackeffect );
 	};
 	//callback function to bring a hidden box back
-    function callback() {
-		//$(this).css('zIndex', '10');
+    function callbackeffect() {
 		setTimeout(function() {
 			$("#effect:visible").removeAttr( "style" ).fadeOut();
-			//$("#toggler").css('z-index', -1);
-			//$("#effect:visible").hide();
 		}, 1000 );
 	};
-
 	$("#buttoneffect").on("click",()=>{
 		runEffect();
 	});
 	$("#effect").hide();
-
+	//call effect with message text
+	function displayeffectmessage(_msg){
+		$('#displaymessage').text(_msg);
+		runEffect();
+	}
+	//simple confirm dialog for search alias check key
 	$("#dialog-pub").dialog({
 		resizable: false,
 		height: "auto",
@@ -180,8 +179,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 				$('#whoalias').text(who);
 				console.log('who',who);
 				if(!who){
-					$('#displaymessage').text('No Alias!');
-					runEffect();
+					displayeffectmessage('No Alias!');
 					return;
 				}
 				$("#dialog-alias").data('param_1',$("#dialog-pub").data('param_1')); //id name,born,education ,skills
@@ -192,7 +190,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			}
 		}
 	});
-
+	// grant access to alias to user info
 	$("#dialog-alias").dialog({
 		resizable: false,
 		height: "auto",
@@ -216,13 +214,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 			Cancel: function() {
 				$(this).dialog("close");
 				console.log("Cancel grant!");
+				displayeffectmessage("Cancel Grant Access!")
 			}
 		}
 	});
 	//this does not work correct yet
 	$('#gunconnect').click(()=>{
 		//console.log('connect!?');
-		let peers = gun.back('opt.peers');
+		let peers = gun.back('opt.peers');//get current peers list
 		console.log(peers); //need to call else it will not connect for some reason
 		let url = '';
 		/*
@@ -240,7 +239,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//console.log(gun);
 		if(peers[url] == null)return;
 		if(url == '')return;
-
 		if(peers[url].url == null){//if url is null and set url for connect
 			console.log(peers[url]);
 			peers[url].url = url;
@@ -250,7 +248,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	});
 
 	$('#gundisconnect').click(()=>{
-		let peers = gun.back('opt.peers');
+		let peers = gun.back('opt.peers');//get current peers list
 		let url;
 		if(location.origin == 'http://localhost:3000'){
 			url ='http://localhost:8080' + '/gun';
@@ -262,28 +260,26 @@ gun.on('bye', (peer)=>{// peer disconnect
 		peers[url].url = null;
 		clearTimeout(peers[url].defer);
 	});
-
+	//theme change to light or default setting
 	$('#light').click(()=>{
 		document.querySelector('body').classList.remove("dark");
 		document.querySelector('body').classList.add("light");
 	});
-
+	//theme change to night theme
 	$('#dark').click(()=>{
 		document.querySelector('body').classList.remove("light");
 		document.querySelector('body').classList.add("dark");
 	});
-
+	//simple user copy key
 	$('#copypublickey').click(()=>{
 		$('#dashpublickey').select();
 		document.execCommand("copy");
 	});
-
+	//check if user is login if there session is active.
 	$('#checkuserdata').click(()=>{
-		//console.log(user);
+		//check if user exist
 		if(user.is){
-			//console.log("auth?");
-			view_auth();
-			//console.log(user.pair());
+			view_auth();//go to main render for public access to current user sign in.
 		}
 	});
 
@@ -488,37 +484,38 @@ gun.on('bye', (peer)=>{// peer disconnect
 	`;
 	//#endregion
 
+	//display html and setup login page.
 	function view_login(){
-		$('#view').empty().append(html_login);
-		$('#login').click(()=>{
+		$('#view').empty().append(html_login);//render html
+		$('#login').click(()=>{//login action
 			//console.log('login...?');
-			authalias($('#alias').val(),$('#passphrase').val());
+			authalias($('#alias').val(),$('#passphrase').val());//call and check for login
 		});
-		$('#signup').click(()=>{
+		$('#signup').click(()=>{//sign up action
 			//console.log('signup...?');
-			createalias($('#alias').val(),$('#passphrase').val());
+			createalias($('#alias').val(),$('#passphrase').val());//call and check exist and register user.
 		});
-		$('#forgot').click(()=>{
-			console.log('forgot...?');
-			view_forgot()
+		$('#forgot').click(()=>{//forgot action
+			//console.log('forgot...?');
+			view_forgot();//go to html render and setup
 		});
 	}
-
+	//display html and setup fogot page.
 	function view_forgot(){
-		$('#view').empty().append(html_forgot);
+		$('#view').empty().append(html_forgot);//render html
 		
-		$('#backlogin').click(()=>{
-			console.log('backlogin...?');
+		$('#backlogin').click(()=>{//back to login page
+			//console.log('backlogin...?');
 			view_login();
 		});
 
 		$('#gethint').click(()=>{
-			getforgotpasswordhint();
+			getforgotpasswordhint();//call check hint and check if correct
 		});
 	}
-
+	//display html and setup change password page.
 	async function view_changepassword(){
-		$('#view').empty().append(html_changepasword);
+		$('#view').empty().append(html_changepasword);// render html
 		$('#authback').click(()=>{
 			view_auth();
 		});
@@ -526,53 +523,47 @@ gun.on('bye', (peer)=>{// peer disconnect
 			changeforgotpassword();
 		});
 	}
-
+	//display html and password hint setup page.
 	async function view_passwordhint(){
-		$('#view').empty().append(html_passwordhint);
-		$('#authback').click(()=>{
+		$('#view').empty().append(html_passwordhint);// render html
+		$('#authback').click(()=>{//go back to home
 			view_auth();
 		});
-		let epub = user.pair().epub;
-
-		let q1 = await user.get('forgot').get('q1').then();
-		let dec = await Gun.SEA.secret(epub, user.pair());
-		q1 = await Gun.SEA.decrypt(q1,dec);
-		$('#q1').val(q1);
-		let q2 = await user.get('forgot').get('q2').then();
-		q2 = await Gun.SEA.decrypt(q2,dec);
-		$('#q2').val(q2);
-		let hint = await user.get('hint').then();
-		dec = await Gun.SEA.work(q1,q2);
-		hint = await Gun.SEA.decrypt(hint,dec);
-		$('#hint').val(hint);
+		let epub = user.pair().epub;// private key
+		let q1 = await user.get('forgot').get('q1').then(); //get question 1
+		let dec = await Gun.SEA.secret(epub, user.pair()); // set secret key for decrypt
+		q1 = await Gun.SEA.decrypt(q1,dec); //decrypt question string
+		$('#q1').val(q1); //set input question 1
+		let q2 = await user.get('forgot').get('q2').then(); //get question 2
+		q2 = await Gun.SEA.decrypt(q2,dec); //decrypt question string
+		$('#q2').val(q2); //set input question 2
+		let hint = await user.get('hint').then(); //get hint hash string
+		dec = await Gun.SEA.work(q1,q2); // decrypt hash key
+		hint = await Gun.SEA.decrypt(hint,dec); //hash data to string
+		$('#hint').val(hint); //set hint string input
 
 		$('#setpasswordhint').click(()=>{
-			applyforgotpasswordhint();
+			applyforgotpasswordhint(); //apply and save data to user current profile.
 		});
 	}
-
+	//display html and setup private message page.
 	async function view_privatemessage(){
-		$('#view').empty().append(html_privatemessage);
-		//$(".child2").css("max-height", ($(".parent").height()-$(".child1").height()));
-		$("#messagelist").css("height", ($("#messsage_parent").height()-$("#messsage_child1").height()));
-		$( window ).resize(function() {
-			$("#messagelist").css("height", ($("#messsage_parent").height()-$("#messsage_child1").height()));
-		});
+		$('#view').empty().append(html_privatemessage);//render html
+		setupscrollparentc1c2("messsage_parent","messsage_child1","messagelist");//setup scroll
 
-		$('#authback').click(()=>{
+		$('#authback').click(()=>{//back to main page
 			view_auth();
 		});
-		$('#pub').on('keyup', checkuserid);
-		$('#message').on('keyup',(e)=>{
+		$('#pub').on('keyup', checkuserid); //input key check pub alias
+		$('#message').on('keyup',(e)=>{ //listen user input key up event
 			e = e || window.event;
 			if (e.keyCode == 13) {//enter key
-				console.log("message enter");
-				let text = ($('#message').val() || '').trim();
-				if(!text){
+				//console.log("message enter");
+				let text = ($('#message').val() || '').trim();//get text input
+				if(!text){//if string is empty, do not pass and return from begin.
 					return true;	
 				}
-				privatemessage($('#pub').val(),$('#message').val());
-
+				privatemessage($('#pub').val(),$('#message').val());//alias public key, text message
 				return false;
 			}
 			return true;
@@ -581,97 +572,90 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log("apply");
 			privatemessage($('#pub').val(),$('#message').val());
 		});
-
+		//get contacts to up date the list
 		UpdateContactList();
 		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
 		$('#contacts').on('change',function(){
-			//var id = $(this).children(":selected").attr("id");
 			var id = $(this).find('option:selected').attr('id');
 			//console.log(id);
-			//user.get('contact').get(id).then();
 			setpubkeyinput(id,'pub');
 		});
 
 		$('#contactadd').on('click', ()=>{addcontact('pub')});
 		$('#contactremove').on('click',()=>{removecontact('pub')});
 	}
-
+	//display and setup auth page.
 	async function view_auth(){
-		$('#view').empty().append(html_auth);
-		$('#alias').text('Alias: '+user.is.alias);
-		$('#publickey').val(user.is.pub);
-		$('#displayAlias').text('Alias: '+user.is.alias);
-		$('#dashpublickey').val(user.is.pub);
+		$('#view').empty().append(html_auth);//render html
+		$('#alias').text('Alias: '+user.is.alias);//get current user name
+		$('#publickey').val(user.is.pub);//get user public key
+		$('#displayAlias').text('Alias: '+user.is.alias);//get current user name
+		$('#dashpublickey').val(user.is.pub);//get user public key
 		$('#logout').click(()=>{
 			user.leave();
 			view_login();
 		});
-
+		//get profile params and set input to value
 		profilesetdata('name');
 		profilesetdata('born');
 		profilesetdata('education');
 		profilesetdata('skills');
-
+		//grant access to info. Not yet worked on.
 		profilegrantdata('name');
 		profilegrantdata('born');
 		profilegrantdata('education');
 		profilegrantdata('skills');
 
-		$('#passwordhint').click(()=>{
+		$('#passwordhint').click(()=>{//button to password hint render element
 			view_passwordhint();
 		});
-		$('#privatemessage').click(()=>{
+		$('#privatemessage').click(()=>{//button to private message render element
 			view_privatemessage();
 		});
-		$('#copykey').click(()=>{
+		$('#copykey').click(()=>{ //copy public key
 			$('#publickey').select();
 			document.execCommand("copy");
 		});
-		$('#changepassword').click((e)=>{
+		$('#changepassword').click((e)=>{//button to change password render element
 			view_changepassword();
 		})
 
-		$('#profilesearch').on('keyup', searchuserid);
+		$('#profilesearch').on('keyup', searchuserid);//input type look up alias public key search
 
+		//update contact list 
 		UpdateContactList();
 		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
-		$('#contacts').on('change',function(){
+		$('#contacts').on('change',function(){//select event list view info.
 			//var id = $(this).children(":selected").attr("id");
 			var id = $(this).find('option:selected').attr('id');
 			//console.log(id);
-			//user.get('contact').get(id).then();
 			setpubkeyinput(id,'profilesearch');
 		});
 
 		$('#contactremove').on('click', ()=>{removecontact('profilesearch')});
 		$('#contactadd').on('click', ()=>{addcontact('profilesearch')});
 
-		$('#chatroom').on('click', ()=>{
+		$('#chatroom').on('click', ()=>{//button to chat room render element
 			view_chatroom();
 		});
 
-		$('#todolist').on('click', ()=>{
+		$('#todolist').on('click', ()=>{//button to to do list render element
 			view_todolist();
 		});
 	}
 
-	//Chat Room
+	//Display html and setup Chat Room element.
 	function view_chatroom(){
 		let chatroom = gun.get('chatroom');
-		$('#view').empty().append(html_chatroom);
-
-		$("#messages").css("height", ($("#chatroom_parent").height()-$("#chatbox").height()));
-		$( window ).resize(function() {
-			$("#messages").css("height", ($("#chatroom_parent").height()-$("#chatbox").height()));
-		});
-
+		$('#view').empty().append(html_chatroom);//render element html
+		setupscrollparentc1c2("chatroom_parent","chatbox","messages");//setup scroll page
 		//back to auth main
-		$('#authback').click(()=>{
+		$('#authback').click(()=>{//return back to hom
 			chatroom.off();
 			view_auth();
 		});
 
-		chatroom.time((data, key, time)=>{
+		chatroom.time((data, key, time)=>{//listen subscribe for time graph
 			//console.log('time');
 			//console.log(data);
 			//console.log(key);
@@ -680,37 +664,34 @@ gun.on('bye', (peer)=>{// peer disconnect
 				//console.log(id);
 				//console.log(d);
 				//check if id div html element exist
-				var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#messages');
-				if(d){
-					if((d == null)||(d == 'null')){
+				var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#messages');//check for exist element else create element
+				if(d){//check for element exist
+					if((d == null)||(d == 'null')){//check for null if there edit or delete changes.
 						$(div).hide();	
 					}
-					$(div).empty();
+					$(div).empty();//empty element
 					//time = moment.unix(time/1000).format('dddd, MMMM Do, YYYY h:mm:ss A')
-					time = moment.unix(time/1000).format('h:mm:ss A')
-					$('<span>').append('[' + time + '] ').appendTo(div);
-					$('<span>').append('Alias:'+ d.alias  + ' > ').appendTo(div);
-					$('<span>').text(d.message).appendTo(div);
-
-					$("#messages").scrollTop($("#messages")[0].scrollHeight);
+					time = moment.unix(time/1000).format('h:mm:ss A');//convert time to
+					$('<span>').append('[' + time + '] ').appendTo(div);//add time
+					$('<span>').append('Alias:'+ d.alias  + ' > ').appendTo(div);//add alias name
+					$('<span>').text(d.message).appendTo(div);//add message
+					$("#messages").scrollTop($("#messages")[0].scrollHeight);//scroll to bottom
 				}else{
-					$(div).hide();
+					$(div).hide();//hidden element
 				}
 			});
 
 		}, 20);//limit list
 
-		$('#enterchat').on("keyup",function(e){
-			//do stuff here
+		$('#enterchat').on("keyup",function(e){// keybaord event
 			e = e || window.event;
 			//console.log("test?");
-			if (e.keyCode == 13) {
+			if (e.keyCode == 13) {//enter key
 				//console.log($(this).val());
-				let text = ($(this).val() || '').trim();
-				if(!text)
+				let text = ($(this).val() || '').trim();//input text
+				if(!text)//check for empty
 					return;
 				//console.log("enter?");
-				//chatroom.set({alias:user.is.alias,message:text});
 				chatroom.time({alias:user.is.alias,message:text});
 				//chatroom.time(text);
 				return false;
@@ -719,94 +700,85 @@ gun.on('bye', (peer)=>{// peer disconnect
 		 });
 	}
 
-	//To Do List
+	//Display html and setup To Do List page.
 	function view_todolist(){
-		$('#view').empty().append(html_todolist);
-		//todolist_parent
-		$("#todolist_child2").css("height", ($("#todolist_parent").height()-$("#todolist_child1").height()));
-
-		$( window ).resize(function() {
-			$("#todolist_child2").css("height", ($("#todolist_parent").height()-$("#todolist_child1").height()));
-		});
-
-
-		$('#authback').click(()=>{
+		$('#view').empty().append(html_todolist);//render element html
+		//set scroll
+		setupscrollparentc1c2("todolist_parent","todolist_child1","todolist_child2");
+		$('#authback').click(()=>{//return main page
 			user.get('todolist').off(); //does it turn off?
 			view_auth();
 		});
-		$('#todolist').empty();
+		$('#todolist').empty();//empty list
 		user.get('todolist').map().on(async (data,id)=>{
-			feedtodolist(data,id);
+			feedtodolist(data,id);//add list items
 		});
-		$('#inputtodolist').on("keyup",function(e){
-			//do stuff here
+		$('#inputtodolist').on("keyup",function(e){//keyboard event
 			e = e || window.event;
 			//console.log(e.keyCode);
-			if (e.keyCode == 13) {
-				addToDoList();
+			if (e.keyCode == 13) {//enter key
+				addToDoList();//call and check to be added to list
 				return false;
 			}
 			return true;
 		});
-		$('#addtodolist').click(addToDoList);
+		$('#addtodolist').click(addToDoList);//button check add to list
 	}
-
+	//check to do list item
 	function feedtodolist(data,id){
-		let li;
+		let li;//null variable
 		//console.log(id);
 		if(document.getElementById(id)){//check for id exist
 			li = $('#' + id).get(0);//call li id
 		}else{
 			li = $('<li>').attr('id', id).appendTo('ul');//create new li
 		}
-		
-		if(li){
-			if((data == null)||(data == 'null')){
-				$(li).hide();	
+		if(li){//check for exist
+			if((data == null)||(data == 'null')){//check if data is empty
+				$(li).hide();//hide list
 			}
-			$(li).empty();
-			//console.log(data.done);
-			let bdone = false;
-			if(data.done == 'true'){bdone = true;}
-			$('<input type="checkbox" onclick="todolistCheck(this)" ' + (bdone ? 'checked' : '') + '>').appendTo(li);
-			$('<span onclick="todolistTitle(this)">').text(data.text).appendTo(li);
-			$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);
+			$(li).empty();//empty groups element
+			let bdone = false;//set for check input
+			if(data.done == 'true'){bdone = true;}//check for true from gun.get() to boolean convert
+			$('<input type="checkbox" onclick="todolistCheck(this)" ' + (bdone ? 'checked' : '') + '>').appendTo(li);//check box
+			$('<span onclick="todolistTitle(this)">').text(data.text).appendTo(li);//set text and click for input change
+			$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);// button delete
 		}else{
-			$(li).hide();	
+			$(li).hide();//hide element
 		}
 	}
 
 	function todolistTitle(element){
 		//console.log("input init?");
 		element = $(element)
-		if (!element.find('input').get(0)) {
-			element.html('<input value="' + element.html() + '" onkeyup="keypressToDoListTitle(this)">')
+		if (!element.find('input').get(0)) {//check if input !exist
+			element.html('<input value="' + element.html() + '" onkeyup="keypressToDoListTitle(this)">');//change to input and setup key press
 		}
 	}
 
 	function keypressToDoListTitle(element) {
-		if (event.keyCode === 13) {
+		if (event.keyCode === 13) {//enter key
 			//console.log("enter?");
-			user.get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});
+			user.get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});//update key and put text data
 			//get input value
-			let val = $(element).val();
-			element = $(element);
+			let val = $(element).val();//get value
+			element = $(element);//change to jquery for access functions
 			//get parent and clear span element child and add text
-			element.parent().empty().text(val);
+			element.parent().empty().text(val);//empty and set text
 		}
 	}
 
 	function addToDoList(){
-		let text = ($('#inputtodolist').val() || '').trim();
+		let text = ($('#inputtodolist').val() || '').trim(); //get input and clean up string
 		//console.log('add?',text);
-		user.get('todolist').set({text:text,done:'false'},ack=>{
+		user.get('todolist').set({text:text,done:'false'},ack=>{//add object id data to gun database
 			console.log('todolist:',ack);
-			$('#inputtodolist').val('')//clear text string
+			$('#inputtodolist').val('');//clear text string
 		});
 	}
 
 	function removeToDoList(element){
-		let id = $(element).parent().attr('id');
+		let id = $(element).parent().attr('id');//get id that is from gun.get(data,id)
 		//user.get('todolist').get(id).put(null);
 		user.get('todolist').get(id).put('null',ack=>{
 			//console.log(ack);
@@ -819,22 +791,26 @@ gun.on('bye', (peer)=>{// peer disconnect
 	function todolistCheck (element) {
 		let strbool = $(element).prop('checked');
 		strbool = strbool.toString();
-		user.get('todolist').get($(element).parent().attr('id')).put({done:strbool})
+		user.get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
 	}
-	window.todolistTitle = todolistTitle;
+	window.todolistTitle = todolistTitle;//set window global to call outside
 	window.keypressToDoListTitle = keypressToDoListTitle;
 	window.removeToDoList = removeToDoList;
 	window.todolistCheck = todolistCheck;
 
 	async function setpubkeyinput(id,_name){
-		let who = await user.get('contact').get(id).then() || {};
+		let who = await user.get('contact').get(id).then() || {};//get alias object data
 		//who.pub
-		$('#'+_name).val(who.pub);
+		$('#'+_name).val(who.pub);//set input public key 
+		if(_name == 'profilesearch'){
+			searchuserid();//update when selected alias
+		}else{
+			checkuserid();//update when selected alias
+		}
 	}
-
+	//add alias public key
 	async function addcontact(_id){
 		console.log("add contact...");
-		//let pub = ($('#profilesearch').val() || '').trim();
 		let pub = ($('#'+_id).val() || '').trim();
 		//console.log(pub);
 		let to = gun.user(pub);
@@ -849,10 +825,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});
 		}
 	}
-
+	//remove alias contact
 	async function removecontact(_id){
 		console.log("remove");
-		//let pub = ($('#profilesearch').val() || '').trim();
 		let pub = ($('#'+_id).val() || '').trim();
 		let to = gun.user(pub);
 		let who = await to.then() || {};
@@ -863,30 +838,30 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//user.get('contact').get(who.alias).put('null');//fail sea.js check null?
 		user.get('contact').get(who.alias).put('null');
 	}
-
+	//add contact list when call
 	function UpdateContactList(){
 		user.get('contact').once().map().once((data,id)=>{
 			//console.log(data);
-			if(!data.name)
+			if(!data.name)//check for name to exist
 				return;
-			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');
+			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');//check if option id exist else create.
 			if(data){
 				if(data == 'null'){
-					$(option).hide();	
+					$(option).hide();//hide element
 				}
-				$(option).text(data.name);
+				$(option).text(data.name);//set text
 			} else {
-				$(option).hide();
+				$(option).hide();//hide element
 			}
 		});
 	}
-
+	//grant access pub profile params
 	async function profilegrantdata(_name){
 		$('#g'+_name).click(()=>{
 			$("#dialog-pub").data('param_1',_name).dialog("open");
 		});
 	}
-
+	//setup get and set profile params
 	async function profilesetdata(_name){
 		let data= await user.get('profile').get(_name).then();;
 		$('#'+_name).val(data);
@@ -895,7 +870,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			user.get('profile').get(_name).put($('#'+_name).val());
 		});
 	}
-
+	//check change password call
 	function changeforgotpassword(){
 		var old = $('#oldpassword').val();
 		var pass = $('#newpassword').val() || '';
@@ -903,32 +878,35 @@ gun.on('bye', (peer)=>{// peer disconnect
 		user.auth(user.is.alias, old, (ack) => {
 			//console.log(ack);
 			let status = ack.err || "Saved!";
-			$('#displaymessage').text(status);
-			runEffect();
+			displayeffectmessage(status);
 			//console.log(status);
 		}, {change: pass});
 	}
-
+	//apply forgot password hint 
 	async function applyforgotpasswordhint(){
 		user = gun.user();
 		//console.log($('#q1').val());console.log($('#q2').val());console.log($('#hint').val());
-		let q1 = $('#q1').val();
-		let q2 = $('#q2').val();
-		let hint = $('#hint').val();
-		let sec = await Gun.SEA.secret(user.pair().epub, user.pair());
-		let enc_q1 = await Gun.SEA.encrypt(q1, sec);
-		user.get('forgot').get('q1').put(enc_q1);
-		let enc_q2 = await Gun.SEA.encrypt(q2, sec);
-		user.get('forgot').get('q2').put(enc_q2);
-		sec = await Gun.SEA.work(q1,q2);
+		let q1 = $('#q1').val();//get input q1
+		let q2 = $('#q2').val();//get input q2
+		let hint = $('#hint').val();//get input hint
+		let sec = await Gun.SEA.secret(user.pair().epub, user.pair());//get user for encrypt message
+		let enc_q1 = await Gun.SEA.encrypt(q1, sec);//encrypt q1
+		user.get('forgot').get('q1').put(enc_q1);//set hash q1 to user data store
+		let enc_q2 = await Gun.SEA.encrypt(q2, sec);//encrypt q1
+		user.get('forgot').get('q2').put(enc_q2); //set hash q2 to user data store
+		sec = await Gun.SEA.work(q1,q2);//encrypt key
 		//console.log(sec);
-		let enc = await Gun.SEA.encrypt(hint, sec);
+		let enc = await Gun.SEA.encrypt(hint, sec);//encrypt hint
 		//console.log(enc);
-		user.get('hint').put(enc);
-		$('#displaymessage').text('Hint Apply!');
-		runEffect();
+		user.get('hint').put(enc,ack=>{//set hash hint
+			console.log(ack);
+			if(ack.ok){
+				displayeffectmessage('Hint Apply!');
+			}
+		});
+		
 	}
-
+	//check for q1,q2, hint and if correct get forgot password hint
 	async function getforgotpasswordhint(){
 		let alias = ($('#alias').val() || '').trim();
 		let q1 =  ($('#q1').val() || '').trim();
@@ -942,7 +920,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			return;
 		console.log(alias);
 		let who = await gun.get('alias/'+alias).then() || {};
-		console.log(who);
+		//console.log(who);
 
 		if(!who._){
 			//console.log(who);
@@ -959,7 +937,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 		//console.log(hint);
 	}
-
+	//login user auth check
 	function authalias(_alias,_passphrase){
 		//console.log(user.is);
 		user.auth(_alias,_passphrase,(ack)=>{
@@ -967,40 +945,36 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log("created!", ack.pub);
 			if(ack.err){
 				//console.log(ack.err);
-				$('#displaymessage').text(ack.err);
-				runEffect();
+				displayeffectmessage(ack.err);
 				return;
 			}
 			if(ack.pub){
 				//console.log("Login Pass! Pub:", ack.pub);
-				$('#displaymessage').text('Login Auth!');
-				runEffect();
+				displayeffectmessage('Login Auth!');
 				view_auth();
 			}
 		});
 	}
-
+	// create user account
 	function createalias(_alias,_passphrase){
 		user.create(_alias,_passphrase,(ack)=>{
 			//console.log(ack);
 			//console.log("created!", ack.pub);
 			if(ack.err){
 				console.log(ack.err);
-				$('#displaymessage').text(ack.err);
-				runEffect();
+				displayeffectmessage(ack.err);
 				return;
 			}
 			if(ack.pub){
 				console.log("Created! pub", ack.pub);
-				$('#displaymessage').text(ack.pub);
-				runEffect();
+				displayeffectmessage(ack.pub)
 			}
 		});
 	}
 	//search alias profile information
 	async function searchuserid(e){
 		if(!user.is){ return }
-		let pub = $('#profilesearch').val();
+		let pub = $('#profilesearch').val();//get input value
 		let to = gun.user(pub);
 		let who = await to.then() || {};
 		$('#searchstatus').text('Status: checking...');
@@ -1051,7 +1025,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 
 		to.get('message').get(user.pair().pub).map().once((say,id)=>{
-			//console.log("to chat");
+			//console.log("alias chat");
 			UI(say,id,dec);
 		});
 	}
@@ -1147,19 +1121,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	// Private Message
 	async function privatemessage(_pubkey,_message){
-		if(!user.is){ return }
+		if(!user.is){ return }//check if user exist
 		let pub = (_pubkey || '').trim();
 		let message = (_message || '').trim();
-		if(!message) return;
-		if(!pub) return;
-		let to = gun.user(pub);
-		let who = await to.then() || {};
+		if(!message) return;//check id empty
+		if(!pub) return;//check id empty
+		let to = gun.user(pub);//get alias
+		let who = await to.then() || {};//get alias data
 		//console.log(who);
 		if(!who.alias){
-			console.log("No Alias!");
+			//console.log("No Alias!");
 			return;
 		}
-		console.log(who);
+		//console.log(who);
 		var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
 		var enc = await Gun.SEA.encrypt(message, sec);
 		user.get('message').get(pub).set(enc);
