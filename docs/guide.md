@@ -3,6 +3,8 @@
 # Information:
  You need some basics understand of javascript. As well some understand of node graph like trees and keys id tree nodes.
 
+ The project give some simple examples. Private message and chat to make thing easy to learn.
+
 # Install:
  To insntall and run a simple server and run client browser peer to peer with database. You need to install [nodejs](https://nodejs.org). Once install download the project by git clone command.
 

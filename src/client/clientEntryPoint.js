@@ -93,12 +93,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 	
 	var html_message = `
 	<div id="togglemessage" class="toggler">
+		<center>
 		<div id="effect" class="ui-widget-content">
 	  		<h3 class="ui-widget-header">Message:</h3>
 	  		<p id="displaymessage">
 				Message none.
 	  		</p>
 		</div>
+		</center>
 	</div>
 	`;
 	//#endregion
@@ -124,7 +126,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//fixed scroll?
 	$("#view").css("height", ($("#main").height()-$("#navtopbar").height()));
 	$( window ).resize(function() {
-		console.log("resize?");
 		//child2 > parent > child1
 		$("#view").css("height", ($("#main").height()-$("#navtopbar").height()));
 	});
@@ -140,6 +141,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 		} else if ( selectedEffect === "size" ) {
 			options = { to: { width: 280, height: 185 } };
 		}
+		//options = {direction: "right"};
+		options = {direction: "up"};//Blind effect's direction option now supports up, down, left, and right
 		// Run the effect
 		//$("#effect").css('zIndex','9999');
 		//console.log($("#effect").css('position')); //static
@@ -552,9 +555,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#view').empty().append(html_privatemessage);
 		//$(".child2").css("max-height", ($(".parent").height()-$(".child1").height()));
 		$("#messagelist").css("height", ($("#messsage_parent").height()-$("#messsage_child1").height()));
-
 		$( window ).resize(function() {
-			console.log("resize?");
 			$("#messagelist").css("height", ($("#messsage_parent").height()-$("#messsage_child1").height()));
 		});
 
@@ -660,9 +661,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#view').empty().append(html_chatroom);
 
 		$("#messages").css("height", ($("#chatroom_parent").height()-$("#chatbox").height()));
-
 		$( window ).resize(function() {
-			console.log("resize?");
 			$("#messages").css("height", ($("#chatroom_parent").height()-$("#chatbox").height()));
 		});
 
@@ -727,7 +726,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$("#todolist_child2").css("height", ($("#todolist_parent").height()-$("#todolist_child1").height()));
 
 		$( window ).resize(function() {
-			console.log("resize?");
 			$("#todolist_child2").css("height", ($("#todolist_parent").height()-$("#todolist_child1").height()));
 		});
 
@@ -868,7 +866,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	function UpdateContactList(){
 		user.get('contact').once().map().once((data,id)=>{
-			console.log(data);
+			//console.log(data);
 			if(!data.name)
 				return;
 			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');
