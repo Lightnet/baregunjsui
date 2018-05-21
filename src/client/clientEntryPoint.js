@@ -82,13 +82,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<p> Public Key: <input id="aliaspubkey">  </p>
 	</div>
 	`;
-
+	//dialog grant alias acces
 	var html_dialog_alias = `
 	<div id="dialog-alias" title="Access Confirm!">
 	<p> Grant Access to <label id="whoalias">Null</label> </p>
 	</div>
 	`;
-	
+	//display message effect
 	var html_message = `
 	<div id="togglemessage" class="toggler">
 		<center>
@@ -121,7 +121,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	</div>
 	` + html_message);
 	//#endregion
-	//fixed scroll?
+	//setup scroll from parent with child1 and child2 with contain
 	function setupscrollparentc1c2(_parent,_child1,_child2){
 		$("#"+_child2).css("height", ($('#'+_parent).height()-$("#"+_child1).height()));
 		$( window ).resize(function() {
@@ -155,7 +155,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			$("#effect:visible").removeAttr( "style" ).fadeOut();
 		}, 1000 );
 	};
-	$("#buttoneffect").on("click",()=>{
+	$("#buttoneffect").on("click",()=>{//display message effect
 		runEffect();
 	});
 	$("#effect").hide();
@@ -414,7 +414,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		<div id="messages" style="height:100%;overflow:auto;">
 		</div>
 		<div id="chatbox" style="height:auto;">
-			<input id="enterchat"><button>Chat</button><button id="authback">Back</button>
+			<input id="enterchat"><button id="sendchat">Chat</button><button id="authback">Back</button>
 		</div>
 	</div>
 	`;
@@ -548,7 +548,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 	//display html and setup private message page.
 	async function view_privatemessage(){
-		$('#view').empty().append(html_privatemessage);//render html
+		$('#view').empty().append(html_privatemessage);//render html element
 		setupscrollparentc1c2("messsage_parent","messsage_child1","messagelist");//setup scroll
 
 		$('#authback').click(()=>{//back to main page
@@ -586,7 +586,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 	//display and setup auth page.
 	async function view_auth(){
-		$('#view').empty().append(html_auth);//render html
+		$('#view').empty().append(html_auth);//render html element
 		$('#alias').text('Alias: '+user.is.alias);//get current user name
 		$('#publickey').val(user.is.pub);//get user public key
 		$('#displayAlias').text('Alias: '+user.is.alias);//get current user name
@@ -647,7 +647,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//Display html and setup Chat Room element.
 	function view_chatroom(){
 		let chatroom = gun.get('chatroom');
-		$('#view').empty().append(html_chatroom);//render element html
+		$('#view').empty().append(html_chatroom);//render html element 
 		setupscrollparentc1c2("chatroom_parent","chatbox","messages");//setup scroll page
 		//back to auth main
 		$('#authback').click(()=>{//return back to hom
@@ -697,7 +697,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 				return false;
 			}
 			return true;
-		 });
+		});
+		$('#sendchat').click(()=>{
+			let text = ($('#enterchat').val() || '').trim();//input text
+			if(!text)//check for empty
+				return;
+			chatroom.time({alias:user.is.alias,message:text});
+		})
 	}
 
 	//Display html and setup To Do List page.
@@ -743,6 +749,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			$('<input type="checkbox" onclick="todolistCheck(this)" ' + (bdone ? 'checked' : '') + '>').appendTo(li);//check box
 			$('<span onclick="todolistTitle(this)">').text(data.text).appendTo(li);//set text and click for input change
 			$('<button onclick="removeToDoList(this);">').html('x').appendTo(li);// button delete
+			$("#todolist_child2").scrollTop($("#todolist_child2")[0].scrollHeight);//scroll to bottom
 		}else{
 			$(li).hide();//hide element
 		}
@@ -772,7 +779,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let text = ($('#inputtodolist').val() || '').trim(); //get input and clean up string
 		//console.log('add?',text);
 		user.get('todolist').set({text:text,done:'false'},ack=>{//add object id data to gun database
-			console.log('todolist:',ack);
+			//console.log('todolist:',ack);
 			$('#inputtodolist').val('');//clear text string
 		});
 	}
@@ -810,33 +817,35 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 	//add alias public key
 	async function addcontact(_id){
-		console.log("add contact...");
-		let pub = ($('#'+_id).val() || '').trim();
+		//console.log("add contact...");
+		let pub = ($('#'+_id).val() || '').trim();//get public key and clean up space
+		if(!pub) return;//if empty string
 		//console.log(pub);
-		let to = gun.user(pub);
-		let who = await to.then() || {};
-		if(!who.alias){
+		let to = gun.user(pub);//get alias if exist
+		let who = await to.then() || {};//get alias information
+		if(!who.alias){//if not alias name exist do not run next line
 			return;
 		}
-		let bfound = await user.get('contact').get(who.alias).then();
+		let bfound = await user.get('contact').get(who.alias).then();//get alias name check exist
 		console.log(bfound);
 		if((!bfound)||(bfound == 'null')){
-			$('<option>').attr('id', who.alias).text(who.alias).appendTo('#contacts');
-			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});
+			$('<option>').attr('id', who.alias).text(who.alias).appendTo('#contacts');//add html option select element
+			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});//add user data to contact list
 		}
 	}
 	//remove alias contact
 	async function removecontact(_id){
-		console.log("remove");
-		let pub = ($('#'+_id).val() || '').trim();
-		let to = gun.user(pub);
-		let who = await to.then() || {};
-		if(!who.alias){
+		//console.log("remove");
+		let pub = ($('#'+_id).val() || '').trim(); // remove space 
+		if(!pub) return;//check empty then do not run next line
+		let to = gun.user(pub);//from alias public key get user data
+		let who = await to.then() || {};//load user data
+		if(!who.alias){//if alias do not exist do not run next line
 			return;
 		}
-		$('#'+who.alias).remove();
+		$('#'+who.alias).remove();//remove alias name from select option list
 		//user.get('contact').get(who.alias).put('null');//fail sea.js check null?
-		user.get('contact').get(who.alias).put('null');
+		user.get('contact').get(who.alias).put('null');//null contact list match id
 	}
 	//add contact list when call
 	function UpdateContactList(){
@@ -857,30 +866,30 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 	//grant access pub profile params
 	async function profilegrantdata(_name){
-		$('#g'+_name).click(()=>{
-			$("#dialog-pub").data('param_1',_name).dialog("open");
+		$('#g'+_name).click(()=>{//button click
+			$("#dialog-pub").data('param_1',_name).dialog("open");//set param var and open dialog
 		});
 	}
 	//setup get and set profile params
 	async function profilesetdata(_name){
-		let data= await user.get('profile').get(_name).then();;
-		$('#'+_name).val(data);
-		$('#'+_name).on('keyup', function(e){
-			if(!user.is){ return }
-			user.get('profile').get(_name).put($('#'+_name).val());
+		let data = await user.get('profile').get(_name).then(); //get profile param variable
+		$('#'+_name).val(data); //set profile param variable
+		$('#'+_name).on('keyup', function(e){ //keyboard event input
+			if(!user.is){ return } //check for user auth
+			user.get('profile').get(_name).put($('#'+_name).val()); //from user data to update profile param variable
 		});
 	}
 	//check change password call
 	function changeforgotpassword(){
-		var old = $('#oldpassword').val();
-		var pass = $('#newpassword').val() || '';
+		var old = $('#oldpassword').val() || ''; //get old password input
+		var pass = $('#newpassword').val() || '';//get new password input
 
-		user.auth(user.is.alias, old, (ack) => {
+		user.auth(user.is.alias, old, (ack) => {//user auth call
 			//console.log(ack);
-			let status = ack.err || "Saved!";
-			displayeffectmessage(status);
+			let status = ack.err || "Saved!";//check if there error else saved message.
+			displayeffectmessage(status);//dsiplay message effect
 			//console.log(status);
-		}, {change: pass});
+		}, {change: pass});//set config to change password
 	}
 	//apply forgot password hint 
 	async function applyforgotpasswordhint(){
@@ -901,39 +910,38 @@ gun.on('bye', (peer)=>{// peer disconnect
 		user.get('hint').put(enc,ack=>{//set hash hint
 			console.log(ack);
 			if(ack.ok){
-				displayeffectmessage('Hint Apply!');
+				displayeffectmessage('Hint Apply!'); //display message effects
 			}
 		});
 		
 	}
 	//check for q1,q2, hint and if correct get forgot password hint
 	async function getforgotpasswordhint(){
-		let alias = ($('#alias').val() || '').trim();
-		let q1 =  ($('#q1').val() || '').trim();
-		let q2 = ($('#q2').val() || '').trim();
-		console.log('get forgot hint');
+		let alias = ($('#alias').val() || '').trim(); //get alias input
+		let q1 =  ($('#q1').val() || '').trim(); //get q1 input
+		let q2 = ($('#q2').val() || '').trim(); //get q2 input
+		//console.log('get forgot hint');
 		if(!alias){
-			console.log('Empty!');
+			//console.log('Empty!');
 			return;
 		}
 		if((!q1)||(!q2))
 			return;
-		console.log(alias);
-		let who = await gun.get('alias/'+alias).then() || {};
+		//console.log(alias);
+		let who = await gun.get('alias/'+alias).then() || {};//get alias data
 		//console.log(who);
-
 		if(!who._){
 			//console.log(who);
 			//console.log('Not Alias!');
 			return;
 		}
-		let hint = await gun.get('alias/'+alias).map().get('hint').then();
-		let dec = await Gun.SEA.work(q1,q2);
-		hint = await Gun.SEA.decrypt(hint,dec);
-		if(hint){
-			$('#hint').val(hint);
+		let hint = await gun.get('alias/'+alias).map().get('hint').then();//get hash hint string
+		let dec = await Gun.SEA.work(q1,q2);//get q1 and q2 string to key hash
+		hint = await Gun.SEA.decrypt(hint,dec);//get hint and key decrypt message
+		if(hint){//check if hint is string or null
+			$('#hint').val(hint);//get hint and set input value
 		}else{
-			$('#hint').val('Fail Decrypt!');
+			$('#hint').val('Fail Decrypt!');//if null set input to message user.
 		}
 		//console.log(hint);
 	}
@@ -945,128 +953,127 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log("created!", ack.pub);
 			if(ack.err){
 				//console.log(ack.err);
-				displayeffectmessage(ack.err);
+				displayeffectmessage(ack.err);//display message if fail to login auth
 				return;
 			}
 			if(ack.pub){
 				//console.log("Login Pass! Pub:", ack.pub);
-				displayeffectmessage('Login Auth!');
-				view_auth();
+				displayeffectmessage('Login Auth!');//display message login auth 
+				view_auth();//go to render auth html element
 			}
 		});
 	}
 	// create user account
 	function createalias(_alias,_passphrase){
-		user.create(_alias,_passphrase,(ack)=>{
+		user.create(_alias,_passphrase,(ack)=>{//sea.js user create account
 			//console.log(ack);
 			//console.log("created!", ack.pub);
 			if(ack.err){
 				console.log(ack.err);
-				displayeffectmessage(ack.err);
+				displayeffectmessage(ack.err);//display message if exist or error
 				return;
 			}
 			if(ack.pub){
 				console.log("Created! pub", ack.pub);
-				displayeffectmessage(ack.pub)
+				displayeffectmessage(ack.pub);//display message for created account 
 			}
 		});
 	}
 	//search alias profile information
 	async function searchuserid(e){
-		if(!user.is){ return }
+		if(!user.is){ return }//check if not user exist
 		let pub = $('#profilesearch').val();//get input value
-		let to = gun.user(pub);
-		let who = await to.then() || {};
-		$('#searchstatus').text('Status: checking...');
-		if(!who.alias){
-			$('#searchstatus').text('Status: No Alias!');
+		let to = gun.user(pub);//check user and load data
+		let who = await to.then() || {};//load alias data
+		$('#searchstatus').text('Status: checking...');//display message text status
+		if(!who.alias){//check not alias exist
+			$('#searchstatus').text('Status: No Alias!'); //display message for not found alias
 			//console.log('none');
 			return;
 		}else{
-			$('#searchstatus').text('Status: Found Alias ' + who.alias + '!' );
+			$('#searchstatus').text('Status: Found Alias ' + who.alias + '!' ); //display message for found alias
 			//console.log('found!');
 		}
 		//console.log(who);
-		let data_name = await to.get('profile').get('name').then();
-		$('#aname').val(data_name);
-		let data_born = await to.get('profile').get('born').then();
-		$('#aborn').val(data_born);
-		let data_edu = await to.get('profile').get('education').then();
-		$('#aeducation').val(data_edu);
-		let data_skills = await to.get('profile').get('skills').then();
-		$('#askills').val(data_skills);
+		let data_name = await to.get('profile').get('name').then(); //get alisa name
+		$('#aname').val(data_name); // set alisa name
+		let data_born = await to.get('profile').get('born').then(); //get born name
+		$('#aborn').val(data_born); // set born name
+		let data_edu = await to.get('profile').get('education').then(); //get education name
+		$('#aeducation').val(data_edu); // set education name
+		let data_skills = await to.get('profile').get('skills').then(); //get skills name
+		$('#askills').val(data_skills); // set skills name
 	}
 
 	//check Alias, clear message and add messages
 	async function checkuserid(e){
-		if(!user.is){ return }
-		$('#messages').empty();
+		if(!user.is){ return }//if not user exist
+		$('#messages').empty(); //clear messages list element
 		//console.log('test');
-		let pub = $('#pub').val();
-		let to = gun.user(pub);
-		let who = await to.then() || {};
-		//$('publickeystatus').val();
-		$('#publickeystatus').text('Status: checking...');
+		let pub = ($('#pub').val() || '').trim();// get public key
+		if(!pub) return;
+		let to = gun.user(pub); //get alias public key data
+		let who = await to.then() || {};//load alias data
+		$('#publickeystatus').text('Status: checking...'); //display message status
 		if(!who.alias){
-			$('#publickeystatus').text('Status: No Alias!');
+			$('#publickeystatus').text('Status: No Alias!'); //display message status
 			//console.log('none');
 			return;
 		}else{
-			$('#publickeystatus').text('Status: Found Alias ' + who.alias + '!' );
+			$('#publickeystatus').text('Status: Found Alias ' + who.alias + '!' ); //display message status
 			//console.log('found!');
 		}
-		//$('#messages').remove();
 		$('#messages').empty();
 		//console.log(who);
 		let dec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
-		user.get('message').get(pub).map().once((say,id)=>{
+		user.get('message').get(pub).map().once((say,id)=>{ //get user message list from alias
 			//console.log("user chat");
 			UI(say,id,dec);
 		});
 
-		to.get('message').get(user.pair().pub).map().once((say,id)=>{
+		to.get('message').get(user.pair().pub).map().once((say,id)=>{//get alias message list from user
 			//console.log("alias chat");
 			UI(say,id,dec);
 		});
 	}
 
 	// Display Private Message
-	async function UI(say, id, dec){
+	async function UI(say, id, dec){//data, key, decrypt key
 		say = await Gun.SEA.decrypt(say,dec);
-		console.log(say);
+		//console.log(say);
 		//this.messages.push({id:id,message:say});
-		var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul');
+		var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul'); //check id element exist else create element id
 		if(say){
-			if(say == 'null'){
+			if(say == 'null'){//if say is null then hide element
 				$(li).hide();	
 			}
-			$(li).empty();
-			$('<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>').appendTo(li);
-			$('<span onclick="clickTitle(this)">').text(say).appendTo(li);
-			$('<button onclick="clickDelete(this);">').html('x').appendTo(li);
+			$(li).empty(); //empty element
+			$('<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>').appendTo(li); //check box
+			$('<span onclick="clickTitle(this)">').text(say).appendTo(li); //display text 
+			$('<button onclick="clickDelete(this);">').html('x').appendTo(li); //button delete 
 
-			$("#messagelist").scrollTop($("#messagelist")[0].scrollHeight);
+			$("#messagelist").scrollTop($("#messagelist")[0].scrollHeight);//scroll message div to bottom
 		} else {
 			$(li).hide();
 		}
 	}
 	//span click to change span to input
 	function clickTitle(element){
-		console.log("input init?");
-		element = $(element)
-		if (!element.find('input').get(0)) {
-			element.html('<input value="' + element.html() + '" onkeyup="keypressTitle(this)">')
+		//console.log("input init?");
+		element = $(element)//jquery element object
+		if (!element.find('input').get(0)) {//check not exist input
+			element.html('<input value="' + element.html() + '" onkeyup="keypressTitle(this)">')//create input
 		}
 	}
 	//input press enter to change to input to span
 	function keypressTitle(element) {
-		if (event.keyCode === 13) {
+		if (event.keyCode === 13) {//enter key if trigger
 			//todos.get($(element).parent().parent().attr('id')).put({title: $(element).val()});
 			//get input value
-			let val = $(element).val();
-			element = $(element);
+			let val = $(element).val();//get input value
+			element = $(element);//jquery object
 			//get parent and clear span element child and add text
-			element.parent().empty().text(val);
+			element.parent().empty().text(val);//get parent span and set value text
 		}
 	}
 
@@ -1113,7 +1120,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		console.log('delete message?');
 		//todos.get($(element).parent().attr('id')).put(null)
 	}
-	//add to window object since this is self contain sandbox?
+	//add to window function since this is self contain sandbox.
 	window.clickTitle = clickTitle;
 	window.keypressTitle = keypressTitle;
 	window.clickCheck = clickCheck;
@@ -1124,8 +1131,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 		if(!user.is){ return }//check if user exist
 		let pub = (_pubkey || '').trim();
 		let message = (_message || '').trim();
-		if(!message) return;//check id empty
-		if(!pub) return;//check id empty
+		if(!message) return;//check if not message empty
+		if(!pub) return;//check if not id empty
 		let to = gun.user(pub);//get alias
 		let who = await to.then() || {};//get alias data
 		//console.log(who);
@@ -1135,8 +1142,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 		//console.log(who);
 		var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
-		var enc = await Gun.SEA.encrypt(message, sec);
-		user.get('message').get(pub).set(enc);
+		var enc = await Gun.SEA.encrypt(message, sec); //encrypt message
+		user.get('message').get(pub).set(enc);//add message list
 	}
 
 	//init render!
