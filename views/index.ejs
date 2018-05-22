@@ -36,7 +36,7 @@
 			req.addEventListener("progress", function(event) {
 				console.log('??', event.lengthComputable);
 				//if (event.lengthComputable) {
-					var percentComplete = event.loaded / event.total;
+					var percentComplete = (event.loaded / event.total) * 100;
 					percentComplete = Math.floor(percentComplete);
 					console.log(percentComplete);
 					document.getElementById('percent').innerText = percentComplete + '%';
