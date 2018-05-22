@@ -32,8 +32,6 @@ Created by: Lightnet
  * Simple theme light and dark
  * Added simple loading screen since javascript take a while to load.
 
-This just single or two file builds. Line count +1269.
-
 # Notes:
  * This most simple build using jquery and jquery ui simple dialog and popup message.
  * jquery smallest file to helpful tool scripts.

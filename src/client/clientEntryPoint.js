@@ -50,6 +50,7 @@ import { html_forgot } from './components/html_forgot';
 import { html_contacts } from './components/html_contacts';
 
 import { html_documents } from './components/html_documents';
+import { html_document } from './components/html_document';
 
 import { html_privatemessage } from './components/html_privatemessage';
 import { html_chatroom } from './components/html_chatroom';
@@ -525,16 +526,133 @@ gun.on('bye', (peer)=>{// peer disconnect
 		var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
 		return time;
 	}
-	  
 
-	function view_documents(){
+	async function view_document(id){
+		$('#view').empty().append(html_document);//render html element
+		$('#iddoc').val(id);
+		$('#authback').click(()=>{//back to main page
+			view_auth();
+		});
+		$('#documentsback').click(()=>{//back to main page
+			view_documents();
+		});
+
+		setupscrollparentc1c2("document_parent","document_child1","document_child2");//setup scroll
+
+		let documentkey = await user.get('document').get('key').then();
+
+		let content = await gun.get(documentkey).get(id).get('content').then();
+		$('#documentcontent').val(content);
+
+		$('#savedocument').click(async ()=>{
+			let content = $('#documentcontent').val();
+			if(!content) return;
+			console.log(content);
+			//let id = $('#iddoc').val();
+			//if(!id) return;
+			gun.get(documentkey).get(id).put({content:content},ack=>{
+				if(ack.ok){
+					console.log("save!");
+				}
+			});
+		});
+	}
+	  
+	async function view_documents(){
 		$('#view').empty().append(html_documents);//render html element
 		$('#authback').click(()=>{//back to main page
 			view_auth();
 		});
+		
 		setupscrollparentc1c2("document_parent","document_child1","document_child2");//setup scroll
 
+		let documentkey = await user.get('document').get('key').then();
+		if(!documentkey){
+			user.get('document').get('key').put(Gun.text.random(32));
+			documentkey = await user.get('document').get('key').then();
+		}
+
+		updateDocumentList();
+
+		$('#newdocument').click(()=>{
+			newDocument();
+		});
 	}
+
+	async function updateDocumentList(){
+		let documentkey = await user.get('document').get('key').then();
+		console.log(documentkey);
+		gun.get(documentkey).map().once((data,id)=>{
+			console.log(data);
+			//$('#documentlist');
+			var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#documentlist'); //check id element exist else create element id
+			if(div){
+				if((data == null)||(data == 'null'))
+					$(div).hide();
+				$(div).empty(); //empty element
+				$('<span onclick="editNameDocument(this)">').text(data.name).appendTo(div); //display text 
+				$('<button onclick="editDocument(this)">').text(' Edit ').appendTo(div); //display text 
+				$('<button onclick="deleteDocument(this)">').text(' Delete ').appendTo(div); //display text 
+			}else{
+				$(li).hide();
+			}
+		});
+		//$('#documentlist');
+	}
+
+	async function newDocument(){
+		let documentkey = await user.get('document').get('key').then();
+		//Gun.text.random(32)
+		gun.get(documentkey).set({name:'untitled',content:'null',public:'null',private:'null'});
+	}
+
+	async function editNameDocument(element){
+		element = $(element)//jquery element object
+		if (!element.find('input').get(0)) {//check not exist input
+			element.html('<input value="' + element.html() + '" onkeyup="editPressNameDocument(this)">')//create input
+		}
+	}
+	window.editNameDocument=editNameDocument;
+
+	async function editPressNameDocument(element){
+		if (event.keyCode === 13) {//enter key if trigger
+			console.log("edit press?");
+			let textname = ($(element).val() || '').trim();
+			if(!textname)return;
+
+			let id = $(element).parent().parent().attr('id');
+			let documentkey = await user.get('document').get('key').then();
+			gun.get(documentkey).get(id).put({name:textname},ack=>{
+				if(ack.ok){
+					let val = $(element).val();//get input value
+					element = $(element);//jquery object
+					element.parent().empty().text(val);//get parent span and set value text
+				}
+			});
+		}
+	}
+	window.editPressNameDocument=editPressNameDocument;
+
+	async function editDocument(element){
+		let id = $(element).parent().attr('id');
+		//console.log(id);
+		view_document(id);
+	}
+	window.editDocument = editDocument;
+
+	async function deleteDocument(element){
+		let documentkey = await user.get('document').get('key').then();
+		let id = $(element).parent().attr('id');
+		console.log(id);
+		gun.get(documentkey).get(id).put('null',ack=>{
+			console.log(ack);
+			if(ack.ok){
+				$(element).parent().remove();
+			}
+		});
+	}
+
+	window.deleteDocument = deleteDocument;
 
 	//Display html and setup To Do List page.
 	async function view_todolist(){
