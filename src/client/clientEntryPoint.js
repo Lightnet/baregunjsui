@@ -59,7 +59,7 @@ if(location.origin == 'http://localhost:3000'){
 var user = gun.user();
 //console.log(user.pair());
 //user.recall({sessionStorage: true});
-console.log(gun);
+//console.log(gun);
 gun.on('hi', peer => {//peer connect
 	//console.log('connect peer to',peer);
 	console.log('peer connect!');
@@ -174,10 +174,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 		buttons: {
 			"Ok": async function() {
 				$(this).dialog( "close" );
-				let to = gun.user($('#aliaspubkey').val());
+				let to = gun.user($('#aliaspubkey').val());//get alias public key input value
 				let who = await to.get('alias').then();
 				$('#whoalias').text(who);
-				console.log('who',who);
+				//console.log('who',who);
 				if(!who){
 					displayeffectmessage('No Alias!');
 					return;
@@ -209,11 +209,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 				if(!who)
 					return;
 				*/
-				console.log("Pass Grant!");
+				//console.log("Pass Grant!");
 			},
 			Cancel: function() {
 				$(this).dialog("close");
-				console.log("Cancel grant!");
+				//console.log("Cancel grant!");
 				displayeffectmessage("Cancel Grant Access!")
 			}
 		}
@@ -240,7 +240,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		if(peers[url] == null)return;
 		if(url == '')return;
 		if(peers[url].url == null){//if url is null and set url for connect
-			console.log(peers[url]);
+			//console.log(peers[url]);
 			peers[url].url = url;
 			peers[url].wire.onopen();
 			gun.get('a').put({a:'a'});
@@ -827,7 +827,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			return;
 		}
 		let bfound = await user.get('contact').get(who.alias).then();//get alias name check exist
-		console.log(bfound);
+		//console.log(bfound);
 		if((!bfound)||(bfound == 'null')){
 			$('<option>').attr('id', who.alias).text(who.alias).appendTo('#contacts');//add html option select element
 			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});//add user data to contact list
@@ -908,7 +908,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let enc = await Gun.SEA.encrypt(hint, sec);//encrypt hint
 		//console.log(enc);
 		user.get('hint').put(enc,ack=>{//set hash hint
-			console.log(ack);
+			//console.log(ack);
 			if(ack.ok){
 				displayeffectmessage('Hint Apply!'); //display message effects
 			}
@@ -969,12 +969,12 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log(ack);
 			//console.log("created!", ack.pub);
 			if(ack.err){
-				console.log(ack.err);
+				//console.log(ack.err);
 				displayeffectmessage(ack.err);//display message if exist or error
 				return;
 			}
 			if(ack.pub){
-				console.log("Created! pub", ack.pub);
+				//console.log("Created! pub", ack.pub);
 				displayeffectmessage(ack.pub);//display message for created account 
 			}
 		});
@@ -1027,18 +1027,24 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//console.log(who);
 		let dec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
 		user.get('message').get(pub).map().once((say,id)=>{ //get user message list from alias
+			if((say == null)||(say == 'null'))
+				return;
 			//console.log("user chat");
-			UI(say,id,dec);
+			PrivateMessageUI(say,id,dec);
 		});
 
 		to.get('message').get(user.pair().pub).map().once((say,id)=>{//get alias message list from user
+			if((say == null)||(say == 'null'))
+				return;
 			//console.log("alias chat");
-			UI(say,id,dec);
+			PrivateMessageUI(say,id,dec);
 		});
 	}
 
 	// Display Private Message
-	async function UI(say, id, dec){//data, key, decrypt key
+	async function PrivateMessageUI(data, id, dec){//data, key, decrypt key
+		let say = data.message;
+		//console.log(say);
 		say = await Gun.SEA.decrypt(say,dec);
 		//console.log(say);
 		//this.messages.push({id:id,message:say});
@@ -1048,9 +1054,16 @@ gun.on('bye', (peer)=>{// peer disconnect
 				$(li).hide();	
 			}
 			$(li).empty(); //empty element
-			$('<input type="checkbox" onclick="clickCheck(this)" ' + (say.done ? 'checked' : '') + '>').appendTo(li); //check box
-			$('<span onclick="clickTitle(this)">').text(say).appendTo(li); //display text 
-			$('<button onclick="clickDelete(this);">').html('x').appendTo(li); //button delete 
+			let strbool = data.isread;
+			console.log(strbool);
+			let isread = false;
+			if(data.isread == 'true'){
+				isread = true;
+			}
+			$('<input type="checkbox" onclick="clickpmsgCheck(this)" ' + (isread ? 'checked' : '') + '>').appendTo(li); //check box
+			$('<span>').text('IsRead | ').appendTo(li); //check box
+			$('<span onclick="clickpmsgTitle(this)">').text(' ' +say + ' ').appendTo(li); //display text 
+			$('<button onclick="clickpmsgDelete(this);">').html('Delete [x]').appendTo(li); //button delete 
 
 			$("#messagelist").scrollTop($("#messagelist")[0].scrollHeight);//scroll message div to bottom
 		} else {
@@ -1058,33 +1071,131 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 	}
 	//span click to change span to input
-	function clickTitle(element){
+	function clickpmsgTitle(element){
 		//console.log("input init?");
 		element = $(element)//jquery element object
 		if (!element.find('input').get(0)) {//check not exist input
-			element.html('<input value="' + element.html() + '" onkeyup="keypressTitle(this)">')//create input
+			element.html('<input value="' + element.html() + '" onkeyup="keypresspmsgTitle(this)">')//create input
 		}
 	}
 	//input press enter to change to input to span
-	function keypressTitle(element) {
+	async function keypresspmsgTitle(element) {
 		if (event.keyCode === 13) {//enter key if trigger
+			console.log("enter here?");
 			//todos.get($(element).parent().parent().attr('id')).put({title: $(element).val()});
 			//get input value
+			/*
 			let val = $(element).val();//get input value
 			element = $(element);//jquery object
 			//get parent and clear span element child and add text
 			element.parent().empty().text(val);//get parent span and set value text
+			*/
+
+			let id = $(element).parent().parent().attr('id');
+			//console.log(id);
+			let pub = $('#pub').val();
+			let to = gun.user(pub);
+			let who = await to.then() || {};//get alias data
+			//console.log(who);
+			let message = ($(element).val() || '' ).trim();
+			if(!message) return;
+			//console.log(message);
+			//console.log(who);
+			var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
+			//console.log(sec);
+			var message = await Gun.SEA.encrypt(message, sec); //encrypt message
+			//console.log(message);
+
+			user.get('message').get(pub).get(id).once((data)=>{
+				console.log(data);
+				//console.log(id);
+				if(data!=null){
+					user.get('message').get(pub).get(id).put({message:message},ack=>{
+						console.log(ack);
+						if(ack.err){
+							return;
+						}
+						let val = $(element).val();//get input value
+						element = $(element);//jquery object
+						element.parent().empty().text(val);//get parent span and set value text
+						//$(element).parent().hide();
+					});
+					console.log("found!?");
+				}
+			});
+	
+			// from Alias
+			to.get('message').get(user.pair().pub).get(id).once((data)=>{
+				//console.log("to chat");
+				console.log(data);
+				if(data!=null){
+					//not working to delete
+					//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
+					to.get('message').get(user.pair().pub).get(id).put({message:message}, ack=>{
+						console.log(ack);
+						if(ack.err){
+							$(element).parent().empty().text('error');
+							//element.remove();
+							return;
+						}
+						//let val = $(element).val();//get input value
+						//element = $(element);//jquery object
+						//element.empty();//get parent span and set value text
+						//$(element).parent().hide();
+					});
+					console.log("other >> found!?");
+				}
+			});
 		}
 	}
 
-	function clickCheck(element) {
+	function clickpmsgCheck(element) {
 		//todos.get($(element).parent().attr('id')).put({done: $(element).prop('checked')})
+		let id = $(element).parent().attr('id');
+		
+		let strbool = $(element).prop('checked');
+		strbool = strbool.toString();
+		console.log("boolstr:",typeof(strbool));
+		let pub = $('#pub').val();
+		let to = gun.user(pub);
+
+		user.get('message').get(pub).get(id).once((data)=>{
+			//console.log(data);
+			//console.log(id);
+			if(data!=null){
+				user.get('message').get(pub).get(id).put({isread:strbool},ack=>{
+					console.log(ack);
+					if(ack.err){
+						return;
+					}
+					//$(element).parent().hide();
+				});
+				console.log("found!?");
+			}
+		});
+
+		// from Alias
+		to.get('message').get(user.pair().pub).get(id).once((data)=>{
+			//console.log("to chat");
+			if(data!=null){
+				//not working to delete
+				//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
+				to.get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
+					console.log(ack);
+					if(ack.err){
+						return;
+					}
+					//$(element).parent().hide();
+				});
+				console.log("other >> found!?");
+			}
+		});
 	}
 
 	//delete message check from User and other Alias
-	function clickDelete(element) {
+	function clickpmsgDelete(element) {
 		let id = $(element).parent().attr('id');
-		console.log(id);
+		//console.log(id);
 		let pub = $('#pub').val();
 		let to = gun.user(pub);
 		// current user
@@ -1108,23 +1219,23 @@ gun.on('bye', (peer)=>{// peer disconnect
 				//not working to delete
 				//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
 				to.get('message').get(user.pair().pub).get(id).put('null', ack=>{
-					console.log(ack);
+					//console.log(ack);
 					if(ack.err){
 						return;
 					}
 					$(element).parent().hide();
 				});
-				console.log("other >> found!?");
+				//console.log("other >> found!?");
 			}
 		});
-		console.log('delete message?');
+		//console.log('delete message?');
 		//todos.get($(element).parent().attr('id')).put(null)
 	}
 	//add to window function since this is self contain sandbox.
-	window.clickTitle = clickTitle;
-	window.keypressTitle = keypressTitle;
-	window.clickCheck = clickCheck;
-	window.clickDelete = clickDelete;
+	window.clickpmsgTitle = clickpmsgTitle;
+	window.keypresspmsgTitle = keypresspmsgTitle;
+	window.clickpmsgCheck = clickpmsgCheck;
+	window.clickpmsgDelete = clickpmsgDelete;
 
 	// Private Message
 	async function privatemessage(_pubkey,_message){
@@ -1143,7 +1254,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//console.log(who);
 		var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
 		var enc = await Gun.SEA.encrypt(message, sec); //encrypt message
-		user.get('message').get(pub).set(enc);//add message list
+		user.get('message').get(pub).set({message:enc,isread:'false',bdelete:'false'},ack=>{
+			console.log(ack);
+		});//add message list
 	}
 
 	//init render!
