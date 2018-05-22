@@ -551,8 +551,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//let id = $('#iddoc').val();
 			//if(!id) return;
 			gun.get(documentkey).get(id).put({content:content},ack=>{
+				if(ack.err){
+					displayeffectmessage(ack.err);
+					return;
+				}
 				if(ack.ok){
 					console.log("save!");
+					displayeffectmessage('Document Saved!');
 				}
 			});
 		});
