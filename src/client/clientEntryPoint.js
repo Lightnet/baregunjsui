@@ -1345,7 +1345,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 //})();
 
 }
-window.addEventListener('load',init);
+//window.addEventListener('load',init);
+
+init();
 //window.onload = function() {
 	//init();
 //};

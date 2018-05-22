@@ -29,8 +29,6 @@
 		<script>
 			var req = new XMLHttpRequest();
 			
-			//oReq.addEventListener("progress", updateProgress);
-			//oReq.addEventListener("load", transferComplete);
 			//oReq.addEventListener("error", transferFailed);
 			//oReq.addEventListener("abort", transferCanceled);
 			req.addEventListener("progress", function(event) {
@@ -60,6 +58,16 @@
 				});
 				console.log("loaded");
 			}, false);
+
+			function transferFailed(evt) {
+				console.log("An error occurred while transferring the file.");
+			}
+			req.addEventListener("error", transferFailed);
+
+			function transferCanceled(evt) {
+				console.log("The transfer has been canceled by the user.");
+			}
+			req.addEventListener("abort", transferCanceled);
 
 			req.open("GET", "/bundle.js");
 			req.send();
