@@ -35,6 +35,8 @@ import 'gun/lib/path';
 //import 'gun/lib/open';
 import 'gun/lib/then';
 //import 'gun/lib/unset';
+
+//import {html_dialog_aliaskey} from './libs/setupdialog';
 //#endregion
 function init(){
 	//console.log(SEA);
@@ -77,11 +79,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 //===============================================
 
 	//#region html view dialog 
+	
 	var html_dialog_aliaskey = `
 	<div id="dialog-pub" title="Alias Public Key:">
 	<p> Public Key: <input id="aliaspubkey">  </p>
 	</div>
 	`;
+	
 	//dialog grant alias acces
 	var html_dialog_alias = `
 	<div id="dialog-alias" title="Access Confirm!">
