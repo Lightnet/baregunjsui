@@ -1,6 +1,6 @@
 // client-side js
 localStorage.clear(); //clear database for gun
-
+//#region import packages
 import '../scss/main.scss';
 import moment from 'moment';
 //import _ from 'lodash';
@@ -35,7 +35,7 @@ import 'gun/lib/path';
 //import 'gun/lib/open';
 import 'gun/lib/then';
 //import 'gun/lib/unset';
-
+//#endregion
 function init(){
 	//console.log(SEA);
 	var SEA = Gun.SEA;
@@ -464,9 +464,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 			<button id="authback">Back</button>
 			` + html_contacts + `
 			<br><label>Alias Public Key:</label><input id="pub"><label id="publickeystatus">Status: None</label>
-			<br><label>Private Message:</label><input id="message">
-			<br><label>Action:</label><button id="send">Send</button>
-			<br>Messages:
+			<br><label>Private Message:</label><input id="message"><button id="send">Send</button>
+			<div style="width:100%;">Messages:</div>
 		</div>
 		<div id="messagelist">
 			<ul id="messages"></ul>
@@ -550,6 +549,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 	async function view_privatemessage(){
 		$('#view').empty().append(html_privatemessage);//render html element
 		setupscrollparentc1c2("messsage_parent","messsage_child1","messagelist");//setup scroll
+		let userprivatemessageid = await user.get('privatemessage').get('key').then();
+		if(!userprivatemessageid){
+			user.get('privatemessage').get('key').put(Gun.text.random(32));
+			userprivatemessageid = await user.get('privatemessage').get('key').then();
+			gun.get(userprivatemessageid).get('message').put({name:'message'});
+			//console.log(privatemessageid);
+		}
+		
+		//console.log(privatemessageid);
 
 		$('#authback').click(()=>{//back to main page
 			view_auth();
@@ -707,16 +715,27 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	//Display html and setup To Do List page.
-	function view_todolist(){
+	async function view_todolist(){
 		$('#view').empty().append(html_todolist);//render element html
 		//set scroll
 		setupscrollparentc1c2("todolist_parent","todolist_child1","todolist_child2");
 		$('#authback').click(()=>{//return main page
-			user.get('todolist').off(); //does it turn off?
+			//user.get('todolist').off(); //does it turn off?
 			view_auth();
 		});
+		//console.log(Gun.text.random(32));
+		let todolistid = await user.get('todolist').get('key').then();
+		//console.log(todolistid);
+		if(!todolistid){
+			user.get('todolist').get('key').put(Gun.text.random(32));
+			todolistid = await user.get('todolist').get('key').then();
+			//console.log(todolistid);
+		}	
+
 		$('#todolist').empty();//empty list
-		user.get('todolist').map().on(async (data,id)=>{
+		gun.get(todolistid).get('todolist').map().on(async (data,id)=>{
+			console.log(id);
+			console.log(data);
 			feedtodolist(data,id);//add list items
 		});
 		$('#inputtodolist').on("keyup",function(e){//keyboard event
@@ -763,10 +782,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 	}
 
-	function keypressToDoListTitle(element) {
+	async function keypressToDoListTitle(element) {
+		let todolistid = await user.get('todolist').get('key').then();
 		if (event.keyCode === 13) {//enter key
 			//console.log("enter?");
-			user.get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});//update key and put text data
+			gun.get(todolistid).get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});//update key and put text data
 			//get input value
 			let val = $(element).val();//get value
 			element = $(element);//change to jquery for access functions
@@ -775,19 +795,21 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 	}
 
-	function addToDoList(){
+	async function addToDoList(){
+		let todolistid = await user.get('todolist').get('key').then();
 		let text = ($('#inputtodolist').val() || '').trim(); //get input and clean up string
 		//console.log('add?',text);
-		user.get('todolist').set({text:text,done:'false'},ack=>{//add object id data to gun database
+		gun.get(todolistid).get('todolist').set({text:text,done:'false'},ack=>{//add object id data to gun database
 			//console.log('todolist:',ack);
 			$('#inputtodolist').val('');//clear text string
 		});
 	}
 
-	function removeToDoList(element){
+	async function removeToDoList(element){
+		let todolistid = await user.get('todolist').get('key').then();
 		let id = $(element).parent().attr('id');//get id that is from gun.get(data,id)
 		//user.get('todolist').get(id).put(null);
-		user.get('todolist').get(id).put('null',ack=>{
+		gun.get(todolistid).get('todolist').get(id).put('null',ack=>{
 			//console.log(ack);
 			if(ack.ok){//hide li
 				$(element).parent().hide();
@@ -795,10 +817,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 	}
 
-	function todolistCheck (element) {
+	async function todolistCheck (element) {
+		let todolistid = await user.get('todolist').get('key').then();
 		let strbool = $(element).prop('checked');
 		strbool = strbool.toString();
-		user.get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
+		gun.get(todolistid).get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
 	}
 	window.todolistTitle = todolistTitle;//set window global to call outside
 	window.keypressToDoListTitle = keypressToDoListTitle;
@@ -1013,6 +1036,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let pub = ($('#pub').val() || '').trim();// get public key
 		if(!pub) return;
 		let to = gun.user(pub); //get alias public key data
+		
 		let who = await to.then() || {};//load alias data
 		$('#publickeystatus').text('Status: checking...'); //display message status
 		if(!who.alias){
@@ -1023,17 +1047,28 @@ gun.on('bye', (peer)=>{// peer disconnect
 			$('#publickeystatus').text('Status: Found Alias ' + who.alias + '!' ); //display message status
 			//console.log('found!');
 		}
+		let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
+		let userprivatemessageid = await user.get('privatemessage').get('key').then();
+		if(!userprivatemessageid) return;
+		//console.log('aliasmessageid:',aliasmessageid);
+		if(!aliasprivatemessageid)
+			return;
 		$('#messages').empty();
 		//console.log(who);
 		let dec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
-		user.get('message').get(pub).map().once((say,id)=>{ //get user message list from alias
+		
+		//user.get('message').get(pub).map().once((say,id)=>{ //get user message list from alias
+		gun.get(userprivatemessageid).get('message').get(pub).map().once((say,id)=>{ //get user message list from alias
+			console.log("test pm??");
 			if((say == null)||(say == 'null'))
 				return;
 			//console.log("user chat");
 			PrivateMessageUI(say,id,dec);
 		});
 
-		to.get('message').get(user.pair().pub).map().once((say,id)=>{//get alias message list from user
+		gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).map().once((say,id)=>{//get alias message list from user
+		//to.get('message').get(user.pair().pub).map().once((say,id)=>{//get alias message list from user
+			console.log("test pm??");
 			if((say == null)||(say == 'null'))
 				return;
 			//console.log("alias chat");
@@ -1099,6 +1134,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log(who);
 			let message = ($(element).val() || '' ).trim();
 			if(!message) return;
+			let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
+			let userprivatemessageid = await user.get('privatemessage').get('key').then();
+			if(!aliasprivatemessageid) return;
 			//console.log(message);
 			//console.log(who);
 			var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
@@ -1106,11 +1144,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 			var message = await Gun.SEA.encrypt(message, sec); //encrypt message
 			//console.log(message);
 
-			user.get('message').get(pub).get(id).once((data)=>{
+			//user.get('message').get(pub).get(id).once((data)=>{
+			gun.get(userprivatemessageid).get('message').get(pub).get(id).once((data)=>{
 				console.log(data);
 				//console.log(id);
 				if(data!=null){
-					user.get('message').get(pub).get(id).put({message:message},ack=>{
+					//user.get('message').get(pub).get(id).put({message:message},ack=>{
+					gun.get(userprivatemessageid).get('message').get(pub).get(id).put({message:message},ack=>{
 						console.log(ack);
 						if(ack.err){
 							return;
@@ -1125,13 +1165,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 			});
 	
 			// from Alias
-			to.get('message').get(user.pair().pub).get(id).once((data)=>{
+			//to.get('message').get(user.pair().pub).get(id).once((data)=>{
+			gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).once((data)=>{
 				//console.log("to chat");
 				console.log(data);
 				if(data!=null){
 					//not working to delete
 					//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
-					to.get('message').get(user.pair().pub).get(id).put({message:message}, ack=>{
+					//to.get('message').get(user.pair().pub).get(id).put({message:message}, ack=>{
+					gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).put({message:message}, ack=>{
 						console.log(ack);
 						if(ack.err){
 							$(element).parent().empty().text('error');
@@ -1149,7 +1191,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 	}
 
-	function clickpmsgCheck(element) {
+	async function clickpmsgCheck(element) {
 		//todos.get($(element).parent().attr('id')).put({done: $(element).prop('checked')})
 		let id = $(element).parent().attr('id');
 		
@@ -1159,11 +1201,17 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let pub = $('#pub').val();
 		let to = gun.user(pub);
 
-		user.get('message').get(pub).get(id).once((data)=>{
+		let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
+		let userprivatemessageid = await user.get('privatemessage').get('key').then();
+		if(!aliasprivatemessageid) return;
+
+		//user.get('message').get(pub).get(id).once((data)=>{
+		gun.get(userprivatemessageid).get('message').get(pub).get(id).once((data)=>{
 			//console.log(data);
 			//console.log(id);
 			if(data!=null){
-				user.get('message').get(pub).get(id).put({isread:strbool},ack=>{
+				//user.get('message').get(pub).get(id).put({isread:strbool},ack=>{
+				gun.get(userprivatemessageid).get('message').get(pub).get(id).put({isread:strbool},ack=>{
 					console.log(ack);
 					if(ack.err){
 						return;
@@ -1175,12 +1223,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 
 		// from Alias
-		to.get('message').get(user.pair().pub).get(id).once((data)=>{
+		//to.get('message').get(user.pair().pub).get(id).once((data)=>{
+		gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).once((data)=>{
 			//console.log("to chat");
 			if(data!=null){
 				//not working to delete
 				//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
-				to.get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
+				//to.get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
+				gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
 					console.log(ack);
 					if(ack.err){
 						return;
@@ -1193,32 +1243,39 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	//delete message check from User and other Alias
-	function clickpmsgDelete(element) {
+	async function clickpmsgDelete(element) {
 		let id = $(element).parent().attr('id');
 		//console.log(id);
 		let pub = $('#pub').val();
 		let to = gun.user(pub);
+		let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
+		let userprivatemessageid = await user.get('privatemessage').get('key').then();
+		if(!aliasprivatemessageid) return;
 		// current user
-		user.get('message').get(pub).get(id).once((data)=>{
+		//user.get('message').get(pub).get(id).once((data)=>{
+		gun.get(userprivatemessageid).get('message').get(pub).get(id).once((data)=>{
 			//console.log(data);
 			//console.log(id);
 			if(data!=null){
-				user.get('message').get(pub).get(id).put('null',ack=>{
+				//user.get('message').get(pub).get(id).put('null',ack=>{
+					gun.get(userprivatemessageid).get('message').get(pub).get(id).put('null',ack=>{
 					if(ack.err){
 						return;
 					}
 					$(element).parent().hide();
 				});
-				console.log("found!?");
+				//console.log("found!?");
 			}
 		});
 		// from Alias
-		to.get('message').get(user.pair().pub).get(id).once((data)=>{
+		//to.get('message').get(user.pair().pub).get(id).once((data)=>{
+		gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).once((data)=>{
 			//console.log("to chat");
 			if(data!=null){
 				//not working to delete
 				//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
-				to.get('message').get(user.pair().pub).get(id).put('null', ack=>{
+				//to.get('message').get(user.pair().pub).get(id).put('null', ack=>{
+				gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).put('null', ack=>{
 					//console.log(ack);
 					if(ack.err){
 						return;
@@ -1239,6 +1296,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	// Private Message
 	async function privatemessage(_pubkey,_message){
+		console.log("privatemessage");
 		if(!user.is){ return }//check if user exist
 		let pub = (_pubkey || '').trim();
 		let message = (_message || '').trim();
@@ -1248,15 +1306,26 @@ gun.on('bye', (peer)=>{// peer disconnect
 		let who = await to.then() || {};//get alias data
 		//console.log(who);
 		if(!who.alias){
-			//console.log("No Alias!");
+			console.log("No Alias!");
+			return;
+		}
+		let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
+		let userprivatemessageid = await user.get('privatemessage').get('key').then();
+		if(!aliasprivatemessageid){
+			console.log('error no key!');
 			return;
 		}
 		//console.log(who);
 		var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
 		var enc = await Gun.SEA.encrypt(message, sec); //encrypt message
-		user.get('message').get(pub).set({message:enc,isread:'false',bdelete:'false'},ack=>{
+		//user.get('message').get(pub).set({message:enc,isread:'false',bdelete:'false'},ack=>{
+		console.log(userprivatemessageid);
+		console.log(aliasprivatemessageid);
+		console.log(pub);
+		gun.get(userprivatemessageid).get('message').get(pub).set({message:enc,isread:'false',bdelete:'false'},(ack)=>{
 			console.log(ack);
 		});//add message list
+		console.log("end message send!");
 	}
 
 	//init render!
