@@ -2,7 +2,7 @@
 localStorage.clear(); //clear database for gun
 //#region import packages
 import '../scss/main.scss';
-//import moment from 'moment';
+import moment from 'moment';
 //import _ from 'lodash';
 import _ from 'lodash/core';
 import $ from 'jquery';
@@ -32,30 +32,11 @@ import 'gun/nts';
 import 'gun/lib/time';
 import 'gun/lib/path';
 //import 'gun/lib/load';
-import 'gun/lib/open';
+//import 'gun/lib/open';
 import 'gun/lib/then';
 //import 'gun/lib/unset';
 
-import { html_dialog_aliaskey } from './components/dialog_pubkey';
-import { html_dialog_alias } from './components/dialog_grantalias';
-import { html_message } from './components/message_effect';
-
-import { html_auth } from './components/html_auth';
-import { html_login } from './components/html_login';
-
-import { html_aliasprofile } from './components/html_aliasprofile';
-import { html_passwordhint } from './components/html_passwordhint';
-import { html_changepasword } from './components/html_changepasword';
-import { html_forgot } from './components/html_forgot';
-import { html_contacts } from './components/html_contacts';
-
-import { html_documents } from './components/html_documents';
-
-import { html_privatemessage } from './components/html_privatemessage';
-import { html_chatroom } from './components/html_chatroom';
-
-import { html_todolist } from './components/html_todolist';
-
+//import {html_dialog_aliaskey} from './libs/setupdialog';
 //#endregion
 function init(){
 	//console.log(SEA);
@@ -96,6 +77,35 @@ gun.on('bye', (peer)=>{// peer disconnect
 //===============================================
 // SEA.js
 //===============================================
+
+	//#region html view dialog 
+	
+	var html_dialog_aliaskey = `
+	<div id="dialog-pub" title="Alias Public Key:">
+	<p> Public Key: <input id="aliaspubkey">  </p>
+	</div>
+	`;
+	
+	//dialog grant alias acces
+	var html_dialog_alias = `
+	<div id="dialog-alias" title="Access Confirm!">
+	<p> Grant Access to <label id="whoalias">Null</label> </p>
+	</div>
+	`;
+	//display message effect
+	var html_message = `
+	<div id="togglemessage" class="toggler">
+		<center>
+		<div id="effect" class="ui-widget-content">
+	  		<h3 class="ui-widget-header">Message:</h3>
+	  		<p id="displaymessage">
+				Message none.
+	  		</p>
+		</div>
+		</center>
+	</div>
+	`;
+	//#endregion
 
 	//#region html view default 
 	//<button id="buttoneffect">Effect</button>
@@ -277,6 +287,224 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 	});
 
+	//#region html view login
+	var html_login = `
+	<table><tr><td>
+			<span>Alias</span>
+		</td><td>
+			<input id="alias" value="test">
+		</td></tr><tr><td>
+			<span>Passphrase</span>
+		</td><td>
+			<input id="passphrase" value="test">
+		</td></tr><tr><td colspan="2">
+			<center>
+			<button id="login">Login</button>
+			<button id="signup">Sign up</button>
+			<button id="forgot">Forgot Password</button>
+			</center>
+		</td></tr>
+	</table>
+	`;
+	//#endregion
+
+	//#region html view forgot password
+	var html_forgot = `
+	<table><tr><td>
+			<span>Alias</span>
+		</td><td>
+			<input id="alias" value="">
+		</td></tr><tr><td>
+			<span>Q1</span>
+		</td><td>
+			<input id="q1" value="">
+		</td></tr><tr><td>
+			<span>Q1</span>
+		</td><td>
+			<input id="q2" value="">
+		</td></tr><tr><td>
+			<span>Hint</span>
+		</td><td>
+			<input id="hint">
+		</td></tr><tr><td colspan="2">
+		<center>
+			<button id="backlogin">Back</button>
+			<button id="gethint">Get Hint</button>
+		</center>
+		</td></tr>
+	</table>
+	`;
+	//#endregion
+
+	//#region html contacts
+	var html_contacts = `
+	<select id="contacts">
+		<option disabled selected> Select contact </option>
+	</select>
+	<button id="contactadd">Add</button>
+	<button id="contactremove">Remove</button>
+	`;
+	//#endregion
+
+	//#region html view Alias Profile 
+	var html_aliasprofile = `
+	<br><label>Profile Search:</label><input id="profilesearch" style="width:700px;"><label>Status:</label><label id="searchstatus">None</label>
+	<br>` + html_contacts + `
+	<table><tr><td>
+		<label>Name:</label>
+		</td><td>
+			<input id="aname">
+		</td></tr><tr><td>
+			<label>Born:</label>
+		</td><td>
+			<input id="aborn">
+		</td></tr><tr><td>
+			<label>Education:</label>
+		</td><td>
+			<input id="aeducation">
+		</td></tr><tr><td>
+			<label>Skills:</label>
+		</td><td>
+			<input id="askills">
+		</td></tr>
+	</table>
+	`;
+	//#endregion
+	
+	//#region html view auth / main area
+	var html_auth = `
+	<button id="logout" style="float:right;">Logout</button>
+	<button id="passwordhint">Password Hint</button>
+	<button id="changepassword">Change Password</button>
+	<button id="privatemessage">Private Message</button>
+	<!--<button id="documents">Documents</button>-->
+	<button id="chatroom">Chat Room</button>
+	<button id="todolist">To Do List</button>
+	<br><span id="alias">User Alias</span>
+	<br><span>Public Key: <input id="publickey" style="width:700px;" readonly> </span>
+	<button id="copykey">Copy Key</button>
+	<br>
+	<table><tr><td>
+		<label>Name:</label>
+		</td><td>
+			<input id="name">
+		</td><td>
+			<button id="gname">+</button>
+		</td></tr><tr><td>
+			<label>Born:</label>
+		</td><td>
+			<input id="born">
+		</td><td>
+			<button id="gborn">+</button>
+		</td></tr><tr><td>
+			<label>Education:</label>
+		</td><td>
+			<input id="education">
+		</td><td>
+			<button id="geducation">+</button>
+		</td></tr><tr><td>
+			<label>Skills:</label>
+		</td><td>
+			<input id="skills">
+		</td><td>
+			<button id="gskills">+</button>
+		</td></tr>
+	</table>
+	` + html_aliasprofile;
+	//#endregion
+
+	//#region html view chat room
+	var html_chatroom = `
+	<div id="chatroom_parent" style="height:100%;width:100%;">
+		<div id="messages" style="height:100%;overflow:auto;">
+		</div>
+		<div id="chatbox" style="height:auto;">
+			<input id="enterchat"><button id="sendchat">Chat</button><button id="authback">Back</button>
+		</div>
+	</div>
+	`;
+	//#endregion
+
+	//#region html view To Do List
+	var html_todolist = `
+	<div id="todolist_parent" style="height:100%;width:100%;">
+		<div id="todolist_child1">
+			<button id="authback">Back</button>
+			<br>To Do List:
+			<br><input id="inputtodolist"><button id="addtodolist">Add</button>
+		</div>
+		<div id="todolist_child2" style="overflow:auto;">
+			<ul id="todolist"></ul>
+		</div>
+	</div>
+	`;
+	//#endregion
+
+	//#region html view password hint
+	var html_passwordhint = `
+	<button id="authback">Back</button>
+	<table></tr><tr><td>
+			<span>Q1:</span>
+		</td><td>
+			<input id="q1" value="">
+		</td></tr><tr><td>
+			<span>Q2:</span>
+		</td><td>
+			<input id="q2" value="">
+		</td></tr><tr><td>
+			<span>Hint:</span>
+		</td><td>
+			<input id="hint" value="">
+		</td></tr><tr><td colspan="2">
+			<button id="setpasswordhint">Apply</button>
+		</td></tr>
+	</table>
+	`;
+	//#endregion
+
+	//#region html view private message 
+	var html_privatemessage = `
+	<div id="messsage_parent" style="height:100%;width:100%;">
+		<div id="messsage_child1">
+			<button id="authback">Back</button>
+			` + html_contacts + `
+			<br><label>Alias Public Key:</label><input id="pub"><label id="publickeystatus">Status: None</label>
+			<br><label>Private Message:</label><input id="message"><button id="send">Send</button>
+			<div style="width:100%;">Messages:</div>
+		</div>
+		<div id="messagelist">
+			<ul id="messages"></ul>
+		</div>
+	<div>
+	`;
+	//#endregion
+
+	//#region html view change password
+	var html_changepasword = `
+	<button id="authback">Back</button>
+	<br><label>Old Password:</label> <input id="oldpassword">
+	<br><label>New Password:</label> <input id="newpassword">
+	<br><button id="changepassword">Change</button>
+	`;
+	//#endregion
+
+	//display message effect
+	var html_documents = `
+	<div id="document_parent" style="height:100%;width:100%;">
+		<div id="document_child1">
+			<button id="authback">Back</button>
+			<br><button>New Document</button>
+			<button>New Blog</button>
+			<button>New Topic</button>
+		</div>
+		<div id="document_child2">
+			<span>Documents</span>
+			<div id="documentlist"></div>
+		</div>
+	</div>
+	`;
+	//#endregion
+
 	//display html and setup login page.
 	function view_login(){
 		$('#view').empty().append(html_login);//render html
@@ -350,7 +578,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 			gun.get(userprivatemessageid).get('message').put({name:'message'});
 			//console.log(privatemessageid);
 		}
+		
 		//console.log(privatemessageid);
+
 		$('#authback').click(()=>{//back to main page
 			view_auth();
 		});
@@ -474,11 +704,8 @@ gun.on('bye', (peer)=>{// peer disconnect
 						$(div).hide();	
 					}
 					$(div).empty();//empty element
-					//console.log(time);
 					//time = moment.unix(time/1000).format('dddd, MMMM Do, YYYY h:mm:ss A')
-					//time = moment.unix(time/1000).format('h:mm:ss A');//convert time to
-					time = timeConverter(time);
-
+					time = moment.unix(time/1000).format('h:mm:ss A');//convert time to
 					$('<span>').append('[' + time + '] ').appendTo(div);//add time
 					$('<span>').append('Alias:'+ d.alias  + ' > ').appendTo(div);//add alias name
 					$('<span>').text(d.message).appendTo(div);//add message
@@ -512,20 +739,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 			chatroom.time({alias:user.is.alias,message:text});
 		})
 	}
-
-	function timeConverter(UNIX_timestamp){
-		var a = new Date(UNIX_timestamp);
-		var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-		var year = a.getFullYear();
-		var month = months[a.getMonth()];
-		var date = a.getDate();
-		var hour = a.getHours();
-		var min = a.getMinutes();
-		var sec = a.getSeconds();
-		var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-		return time;
-	}
-	  
 
 	function view_documents(){
 		$('#view').empty().append(html_documents);//render html element
@@ -1145,9 +1358,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		var sec = await Gun.SEA.secret(who.epub, user.pair()); // Diffie-Hellman
 		var enc = await Gun.SEA.encrypt(message, sec); //encrypt message
 		//user.get('message').get(pub).set({message:enc,isread:'false',bdelete:'false'},ack=>{
-		//console.log(userprivatemessageid);
-		//console.log(aliasprivatemessageid);
-		//console.log(pub);
+		console.log(userprivatemessageid);
+		console.log(aliasprivatemessageid);
+		console.log(pub);
 		gun.get(userprivatemessageid).get('message').get(pub).set({message:enc,isread:'false',bdelete:'false'},(ack)=>{
 			console.log(ack);
 		});//add message list

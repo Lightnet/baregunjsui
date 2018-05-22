@@ -3,4 +3,3 @@ export var html_dialog_aliaskey = `
 	<p> Public Key: <input id="aliaspubkey">  </p>
 	</div>
     `;
-    
