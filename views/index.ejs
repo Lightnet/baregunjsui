@@ -34,15 +34,17 @@
 			//oReq.addEventListener("error", transferFailed);
 			//oReq.addEventListener("abort", transferCanceled);
 			req.addEventListener("progress", function(event) {
-				if (event.lengthComputable) {
+				console.log('??', event.lengthComputable);
+				//if (event.lengthComputable) {
 					var percentComplete = event.loaded / event.total;
 					percentComplete = Math.floor(percentComplete);
+					console.log(percentComplete);
 					document.getElementById('percent').innerText = percentComplete + '%';
 					// ...
-				} else {
+				//} else {
 					// Unable to compute progress information since the total size is unknown
-					console.log("Unable to compute progress");
-				}
+					//console.log("Unable to compute progress");
+				//}
 			}, false);
 			// load responseText into a new script element
 			req.addEventListener("load", function(event) {
