@@ -102,7 +102,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	</div>
 	`;
 	//#endregion
-	
+
 	//#region html view default 
 	//<button id="buttoneffect">Effect</button>
 	$('#app').empty().append( html_dialog_alias + html_dialog_aliaskey +`
@@ -373,6 +373,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<button id="passwordhint">Password Hint</button>
 	<button id="changepassword">Change Password</button>
 	<button id="privatemessage">Private Message</button>
+	<!--<button id="documents">Documents</button>-->
 	<button id="chatroom">Chat Room</button>
 	<button id="todolist">To Do List</button>
 	<br><span id="alias">User Alias</span>
@@ -480,6 +481,23 @@ gun.on('bye', (peer)=>{// peer disconnect
 	<br><label>Old Password:</label> <input id="oldpassword">
 	<br><label>New Password:</label> <input id="newpassword">
 	<br><button id="changepassword">Change</button>
+	`;
+	//#endregion
+
+	//display message effect
+	var html_documents = `
+	<div id="document_parent" style="height:100%;width:100%;">
+		<div id="document_child1">
+			<button id="authback">Back</button>
+			<br><button>New Document</button>
+			<button>New Blog</button>
+			<button>New Topic</button>
+		</div>
+		<div id="document_child2">
+			<span>Documents</span>
+			<div id="documentlist"></div>
+		</div>
+	</div>
 	`;
 	//#endregion
 
@@ -650,6 +668,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#todolist').on('click', ()=>{//button to to do list render element
 			view_todolist();
 		});
+
+		$('#documents').on('click', ()=>{//button to documents render element
+			view_documents();
+		});
 	}
 
 	//Display html and setup Chat Room element.
@@ -688,7 +710,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 					$(div).hide();//hidden element
 				}
 			});
-
+		//});//non limited
 		}, 20);//limit list
 
 		$('#enterchat').on("keyup",function(e){// keybaord event
@@ -714,6 +736,15 @@ gun.on('bye', (peer)=>{// peer disconnect
 		})
 	}
 
+	function view_documents(){
+		$('#view').empty().append(html_documents);//render html element
+		$('#authback').click(()=>{//back to main page
+			view_auth();
+		});
+		setupscrollparentc1c2("document_parent","document_child1","document_child2");//setup scroll
+
+	}
+
 	//Display html and setup To Do List page.
 	async function view_todolist(){
 		$('#view').empty().append(html_todolist);//render element html
@@ -733,9 +764,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}	
 
 		$('#todolist').empty();//empty list
-		gun.get(todolistid).get('todolist').map().on(async (data,id)=>{
-			console.log(id);
-			console.log(data);
+		gun.get(todolistid).get('todolist').map().on((data,id)=>{
+			//console.log(id);
+			//console.log(data);
 			feedtodolist(data,id);//add list items
 		});
 		$('#inputtodolist').on("keyup",function(e){//keyboard event
@@ -1063,7 +1094,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			if((say == null)||(say == 'null'))
 				return;
 			//console.log("user chat");
-			PrivateMessageUI(say,id,dec);
+			PrivateMessageUI(say,id,dec,user.is.alias);
 		});
 
 		gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).map().once((say,id)=>{//get alias message list from user
@@ -1072,12 +1103,12 @@ gun.on('bye', (peer)=>{// peer disconnect
 			if((say == null)||(say == 'null'))
 				return;
 			//console.log("alias chat");
-			PrivateMessageUI(say,id,dec);
+			PrivateMessageUI(say,id,dec,who.alias);
 		});
 	}
 
 	// Display Private Message
-	async function PrivateMessageUI(data, id, dec){//data, key, decrypt key
+	async function PrivateMessageUI(data, id, dec, who){//data, key, decrypt key
 		let say = data.message;
 		//console.log(say);
 		say = await Gun.SEA.decrypt(say,dec);
@@ -1095,10 +1126,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 			if(data.isread == 'true'){
 				isread = true;
 			}
-			$('<input type="checkbox" onclick="clickpmsgCheck(this)" ' + (isread ? 'checked' : '') + '>').appendTo(li); //check box
-			$('<span>').text('IsRead | ').appendTo(li); //check box
-			$('<span onclick="clickpmsgTitle(this)">').text(' ' +say + ' ').appendTo(li); //display text 
-			$('<button onclick="clickpmsgDelete(this);">').html('Delete [x]').appendTo(li); //button delete 
+			if(who == user.is.alias){
+				$('<input type="checkbox" onclick="clickpmsgCheck(this)" ' + (isread ? 'checked' : '') + '>').appendTo(li); //check box
+				$('<span>').text('IsRead | ').appendTo(li); //check box
+			}
+			$('<span onclick="clickpmsgTitle(this)">').text(who + ' | ' +say + ' ').appendTo(li); //display text 
+			if(who == user.is.alias){
+				$('<button onclick="clickpmsgDelete(this);">').html('Delete [x]').appendTo(li); //button delete 
+			}
 
 			$("#messagelist").scrollTop($("#messagelist")[0].scrollHeight);//scroll message div to bottom
 		} else {
@@ -1327,6 +1362,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});//add message list
 		console.log("end message send!");
 	}
+
 
 	//init render!
 	//view_login();

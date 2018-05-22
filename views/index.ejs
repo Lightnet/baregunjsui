@@ -28,22 +28,17 @@
 		-->
 		<script>
 			var req = new XMLHttpRequest();
-			
-			//oReq.addEventListener("error", transferFailed);
-			//oReq.addEventListener("abort", transferCanceled);
 			req.addEventListener("progress", function(event) {
-				console.log('??', event.lengthComputable);
+				//console.log('??', event.lengthComputable);
 				if (event.lengthComputable) {
 					var percentComplete = (event.loaded / event.total) * 100;
 					percentComplete = Math.floor(percentComplete);
 					//console.log(percentComplete);
 					document.getElementById('percent').innerText = percentComplete + '%';
 					document.getElementById('progressbar').value = percentComplete;
-					
-					// ...
 				} else {
 					// Unable to compute progress information since the total size is unknown
-					//console.log("Unable to compute progress");
+					console.log("Unable to compute progress");
 				}
 			}, false);
 			// load responseText into a new script element
@@ -61,18 +56,20 @@
 				console.log("loaded");
 			}, false);
 
-			function transferFailed(evt) {
+			function transferFailed(event) {
 				console.log("An error occurred while transferring the file.");
 			}
 			req.addEventListener("error", transferFailed);
-
-			function transferCanceled(evt) {
+			function transferCanceled(event) {
 				console.log("The transfer has been canceled by the user.");
 			}
 			req.addEventListener("abort", transferCanceled);
-
 			req.open("GET", "/bundle.js");
 			req.send();
+
+			function progressbar(event){
+				console.log("loading...");
+			}
 
     	</script>
     	<style>
@@ -108,9 +105,17 @@
     	<div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
     	<script src="https://button.glitch.me/button.js"></script>
     	-->
-		<!-- import the webpage's client-side javascript file 
-		<script src="/bundle.js"></script>
+		<!-- import the webpage's client-side javascript file -->
+		<!--
+		<script id="progressbarid" onprogress="progressbar()" src="/bundle.js"></script>
 		-->
-    	
+		<script>
+			//document.body.addEventListener("load", (e)=>{
+				//console.log("progressbarid load?");
+			//});
+			window.addEventListener("load",(e)=>{
+				console.log("loaded?");
+			});
+		</script>
   	</body>
 </html>
