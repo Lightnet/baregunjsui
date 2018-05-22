@@ -9,7 +9,11 @@
  * https://stackoverflow.com/questions/11715646/scroll-automatically-to-the-bottom-of-the-page
  * https://stackoverflow.com/questions/27784727/how-to-make-child-div-scrollable-when-it-exceeds-parent-height
  * http://jsfiddle.net/m9goxrbk/ resize parent child1 child2
- * 
+ * https://stackoverflow.com/questions/20014933/progress-of-loading-external-js-file
+
+
+
+ 
 
 
 # Examples:
@@ -19,3 +23,6 @@
 
 
  http://jsbin.com/nafukinumi/edit?js,console,output todolist simple
+
+
+ 

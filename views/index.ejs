@@ -41,6 +41,7 @@
 					// ...
 				} else {
 					// Unable to compute progress information since the total size is unknown
+					console.log("Unable to compute progress");
 				}
 			}, false);
 			// load responseText into a new script element
@@ -54,11 +55,10 @@
 				s.addEventListener("load", function() {
 					// this runs after the new script has been executed...
 				});
-
 			}, false);
+
 			req.open("GET", "/bundle.js");
 			req.send();
-
 
     	</script>
     	<style>
