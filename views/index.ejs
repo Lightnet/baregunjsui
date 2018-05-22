@@ -27,6 +27,39 @@
 		<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
 		-->
 		<script>
+			var req = new XMLHttpRequest();
+			
+			//oReq.addEventListener("progress", updateProgress);
+			//oReq.addEventListener("load", transferComplete);
+			//oReq.addEventListener("error", transferFailed);
+			//oReq.addEventListener("abort", transferCanceled);
+			req.addEventListener("progress", function(event) {
+				if (event.lengthComputable) {
+					var percentComplete = event.loaded / event.total;
+					percentComplete = Math.floor(percentComplete);
+					document.getElementById('percent').innerText = percentComplete + '%';
+					// ...
+				} else {
+					// Unable to compute progress information since the total size is unknown
+				}
+			}, false);
+			// load responseText into a new script element
+			req.addEventListener("load", function(event) {
+				var e = event.target;
+				var s = document.createElement("script");
+				s.innerHTML = e.responseText;
+				// or: s[s.innerText!=undefined?"innerText":"textContent"] = e.responseText
+				document.documentElement.appendChild(s);
+
+				s.addEventListener("load", function() {
+					// this runs after the new script has been executed...
+				});
+
+			}, false);
+			req.open("GET", "/bundle.js");
+			req.send();
+
+
     	</script>
     	<style>
 			.loader {
@@ -52,7 +85,7 @@
   	<body>
 		<div id="loading">
 		<div class="loader"></div>
-		Loading App...
+		<span id="percent"> </span> Loading App...
 		</div>
 		<div id="app"></div>
     	<!-- include the Glitch button to show what the webpage is about and
@@ -60,7 +93,9 @@
     	<div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
     	<script src="https://button.glitch.me/button.js"></script>
     	-->
-    	<!-- import the webpage's client-side javascript file -->
-    	<script src="/bundle.js"></script>
+		<!-- import the webpage's client-side javascript file 
+		<script src="/bundle.js"></script>
+		-->
+    	
   	</body>
 </html>
