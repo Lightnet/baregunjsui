@@ -36,8 +36,10 @@
 				if (event.lengthComputable) {
 					var percentComplete = (event.loaded / event.total) * 100;
 					percentComplete = Math.floor(percentComplete);
-					console.log(percentComplete);
+					//console.log(percentComplete);
 					document.getElementById('percent').innerText = percentComplete + '%';
+					document.getElementById('progressbar').value = percentComplete;
+					
 					// ...
 				} else {
 					// Unable to compute progress information since the total size is unknown
@@ -98,6 +100,7 @@
 		<div id="loading">
 		<div class="loader"></div>
 		<span id="percent"> </span> Loading App...
+		<br><progress id="progressbar" value="0" max="100"></progress>
 		</div>
 		<div id="app"></div>
     	<!-- include the Glitch button to show what the webpage is about and
