@@ -19,6 +19,11 @@
 	})();
 ```
 
+```
+user.recall({sessionStorage: true});
+user.leave()//to logout
+```
+
 
 # Gun.js Sea.js
  * https://gun.eco/docs/SEA
