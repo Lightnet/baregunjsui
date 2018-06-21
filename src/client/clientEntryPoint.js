@@ -850,9 +850,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#'+_name).on('keyup', function(e){ //keyboard event input
 			if(!user.is){ return } //check for user auth
 			//user.get('profile').get(_name).put($('#'+_name).val()); //from user data to update profile param variable
-			user.get('profile').get(_name).secret($('#'+_name).val(),ack=>{
-				console.log(ack);
-			});
+			if (e.keyCode == 13) {//enter key
+				user.get('profile').get(_name).secret($('#'+_name).val(),ack=>{
+					console.log(ack);
+				});
+				return false;
+			}
+			return true;
 		});
 	}
 
@@ -975,6 +979,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//search alias profile information
 	async function searchuserid(e){
 		if(!user.is){ return }//check if not user exist
+		GetProfileParam('name');
+		GetProfileParam('born');
+		GetProfileParam('education');
+		GetProfileParam('skills');
+		//$('#aname').val(vname || '');
+
+		/*
 		let pub = $('#profilesearch').val();//get input value
 		let find  = gun.user(pub);//check user and load data
 		let who = await find.then() || {};//load alias data
@@ -989,11 +1000,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 		//console.log(who);
 		let data_name = await find.get('profile').get('name').then(); //get alisa name
+		console.log(data_name);
+
 		let vname = await getaliasprofilevar(find,'name',data_name);
 		$('#aname').val(vname || data_name);// set alisa name //console.log(vname);
-
+		*/
 
 		//let data_born = await find.get('profile').get('born').then(); //get born name
+
 		//let vborn = await getaliasprofilevar(find,'born',data_born);
 		//$('#aborn').val(vborn || data_born); // set born name
 		//let data_edu = await find.get('profile').get('education').then(); //get education name
@@ -1003,19 +1017,45 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//let vskills= await getaliasprofilevar(find,'skills',data_skills);
 		//$('#askills').val(vskills || data_skills); // set skills name
 	}
+	async function GetProfileParam(_name){
+		let pub = $('#profilesearch').val();//get input value
+		var find = gun.user(pub);
+
+		let data_name = await find.get('profile').get('name').then(); //get alisa name
+		console.log(data_name);
+
+		find.get('profile').on(function(data, key, at, ev){
+			Gun.node.is(data, async function(v, k){
+				//console.log('k:',k);
+				if(k == _name){
+					var key = await find.get('trust').get(user.pair().pub).get(k+'profile').then();
+      				var mix = await Gun.SEA.secret(await find.get('epub').then(), user.pair());
+					key = await Gun.SEA.decrypt(key, mix);
+					console.log(v);
+					var val = await Gun.SEA.decrypt(v, key);
+
+					//console.log(val || v);
+					$('#a'+_name).val(val || v);
+					  
+				}
+			});
+		});
+
+	}
+
 
 	async function getaliasprofilevar(find,_name,_value){
 		//console.log(to['_'].pub);
 		//let who = await to.then() || {};//load alias data
 		let pkey = await find.get('trust').get(user.pair().pub).get(_name+'profile').then();
-		find.get('trust').get(user.pair().pub).get(_name+'profile').once((data,id)=>{
-			console.log('id:',id);
-			console.log('data:',data);
-		})
+		//find.get('trust').get(user.pair().pub).get(_name+'profile').once((data,id)=>{
+			//console.log('id:',id);
+			//console.log('data:',data);
+		//})
 		//let pkey = await user.get('trust').get(find['_'].pub).get(_name+'profile').then();
-		console.log(pkey);
+		//console.log(pkey);
 		var mix = await Gun.SEA.secret(await find.get('epub').then(), user.pair());
-		console.log(mix);
+		//console.log(mix);
 		//let epub = await user.get('epub').then();
 		pkey = await Gun.SEA.decrypt(pkey, mix);
 		//console.log(pkey)
@@ -1023,6 +1063,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 		console.log(val)
 		return val || _value;
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
