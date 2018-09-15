@@ -57,6 +57,8 @@ import { html_chatroom } from './components/html_chatroom';
 
 import { html_todolist } from './components/html_todolist';
 
+import { html_access } from './components/html_access';
+
 //#endregion
 function init(){
 	//console.log(SEA);
@@ -100,21 +102,12 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	//#region html view default 
 	//<button id="buttoneffect">Effect</button>
-	$('#app').empty().append( html_dialog_alias + html_dialog_aliaskey +`
-	<div id="main">
-		<div id="navtopbar" style="height:auto;">
-			<span>Themes:</span>
-			<button id="light">Light</button>
-			<button id="dark">Dark</button>
-			<button id="checkuserdata">Is User Session?</button>
-			<button id="gunconnect">Connect</button>
-			<button id="gundisconnect">Disconnect</button><button id="buttoneffect">Effect</button>
-			<br><span id="displayAlias">null</span>
-			<button id="copypublickey">Copy Public Key</button><input id="dashpublickey" style="width:700px;" readonly>
-		</div>
-		<div id="view"></div>
-	</div>
-	` + html_message);
+	$('#app').empty().append( 
+		html_dialog_alias + 
+		html_dialog_aliaskey + 
+		html_access + 
+		html_message
+	);
 	//#endregion
 	//setup scroll from parent with child1 and child2 with contain
 	function setupscrollparentc1c2(_parent,_child1,_child2){
@@ -1063,21 +1056,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 		console.log(val)
 		return val || _value;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	//check Alias, clear message and add messages
 	async function checkuserid(e){
