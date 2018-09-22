@@ -29,7 +29,7 @@ import Gun from 'gun/gun';//browser
 import 'gun/sea';
 //custom chain gun.js
 import 'gun/nts';
-//import 'gun/lib/time';
+import 'gun/lib/time';
 import 'gun/lib/path';
 //import 'gun/lib/load';
 import 'gun/lib/open';
@@ -414,7 +414,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 		$('#changepassword').click((e)=>{//button to change password render element
 			view_changepassword();
-		})
+		});
 
 		$('#profilesearch').on('keyup', searchuserid);//input type look up alias public key search
 
@@ -976,46 +976,14 @@ gun.on('bye', (peer)=>{// peer disconnect
 		GetProfileParam('born');
 		GetProfileParam('education');
 		GetProfileParam('skills');
-		//$('#aname').val(vname || '');
-
-		/*
-		let pub = $('#profilesearch').val();//get input value
-		let find  = gun.user(pub);//check user and load data
-		let who = await find.then() || {};//load alias data
-		$('#searchstatus').text('Status: checking...');//display message text status
-		if(!who.alias){//check not alias exist
-			$('#searchstatus').text('Status: No Alias!'); //display message for not found alias
-			//console.log('none');
-			return;
-		}else{
-			$('#searchstatus').text('Status: Found Alias ' + who.alias + '!' ); //display message for found alias
-			//console.log('found!');
-		}
-		//console.log(who);
-		let data_name = await find.get('profile').get('name').then(); //get alisa name
-		console.log(data_name);
-
-		let vname = await getaliasprofilevar(find,'name',data_name);
-		$('#aname').val(vname || data_name);// set alisa name //console.log(vname);
-		*/
-
-		//let data_born = await find.get('profile').get('born').then(); //get born name
-
-		//let vborn = await getaliasprofilevar(find,'born',data_born);
-		//$('#aborn').val(vborn || data_born); // set born name
-		//let data_edu = await find.get('profile').get('education').then(); //get education name
-		//let veducation = await getaliasprofilevar(find,'education',data_edu);
-		//$('#aeducation').val(veducation || data_edu); // set education name
-		//let data_skills = await find.get('profile').get('skills').then(); //get skills name
-		//let vskills= await getaliasprofilevar(find,'skills',data_skills);
-		//$('#askills').val(vskills || data_skills); // set skills name
 	}
+
 	async function GetProfileParam(_name){
 		let pub = $('#profilesearch').val();//get input value
 		var find = gun.user(pub);
 
-		let data_name = await find.get('profile').get('name').then(); //get alisa name
-		console.log(data_name);
+		//let data_name = await find.get('profile').get('name').then(); //get alisa name
+		//console.log(data_name);
 
 		find.get('profile').on(function(data, key, at, ev){
 			Gun.node.is(data, async function(v, k){
@@ -1033,28 +1001,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 				}
 			});
 		});
-
-	}
-
-
-	async function getaliasprofilevar(find,_name,_value){
-		//console.log(to['_'].pub);
-		//let who = await to.then() || {};//load alias data
-		let pkey = await find.get('trust').get(user.pair().pub).get(_name+'profile').then();
-		//find.get('trust').get(user.pair().pub).get(_name+'profile').once((data,id)=>{
-			//console.log('id:',id);
-			//console.log('data:',data);
-		//})
-		//let pkey = await user.get('trust').get(find['_'].pub).get(_name+'profile').then();
-		//console.log(pkey);
-		var mix = await Gun.SEA.secret(await find.get('epub').then(), user.pair());
-		//console.log(mix);
-		//let epub = await user.get('epub').then();
-		pkey = await Gun.SEA.decrypt(pkey, mix);
-		//console.log(pkey)
-		let val = await Gun.SEA.decrypt(_value, pkey);
-		console.log(val)
-		return val || _value;
 	}
 
 	//check Alias, clear message and add messages
@@ -1150,15 +1096,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 	async function keypresspmsgTitle(element) {
 		if (event.keyCode === 13) {//enter key if trigger
 			console.log("enter here?");
-			//todos.get($(element).parent().parent().attr('id')).put({title: $(element).val()});
-			//get input value
-			/*
-			let val = $(element).val();//get input value
-			element = $(element);//jquery object
-			//get parent and clear span element child and add text
-			element.parent().empty().text(val);//get parent span and set value text
-			*/
-
 			let id = $(element).parent().parent().attr('id');
 			//console.log(id);
 			let pub = $('#pub').val();
@@ -1176,7 +1113,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 			//console.log(sec);
 			var message = await Gun.SEA.encrypt(message, sec); //encrypt message
 			//console.log(message);
-
 			//user.get('message').get(pub).get(id).once((data)=>{
 			gun.get(userprivatemessageid).get('message').get(pub).get(id).once((data)=>{
 				console.log(data);
@@ -1360,8 +1296,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});//add message list
 		console.log("end message send!");
 	}
-
-
 	//init render!
 	//view_login();
 	//https://stackoverflow.com/questions/49519571/gun-v0-9-92-using-sea-cant-put-nested-data-when-not-logged-in
@@ -1377,11 +1311,6 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$("#loading").empty();//empty element html when finish loading javascript...
 	//};
 //})();
-
 }
-//window.addEventListener('load',init);
 
 init();
-//window.onload = function() {
-	//init();
-//};

@@ -2,12 +2,13 @@
 
 Created by: Lightnet
 
+# License: MIT
+
 # Required:
- * nodejs
- * npm
+ * Nodejs
 
 # Code Languages:
- * Babeljs es5/6/7 javascript
+ * Babeljs javascript
  * javascript
 
 # Information:
@@ -33,6 +34,7 @@ Created by: Lightnet
  * Added simple loading screen since javascript take a while to load.
 
 # Notes:
+ * This is just prototype builds for testing.
  * This most simple build using jquery and jquery ui simple dialog and popup message.
  * jquery smallest file to helpful tool scripts.
  * jquery-ui is tricky to setup since they broken in part to reduce file size good for design. Since need few scripts and css to keep file small as possible.

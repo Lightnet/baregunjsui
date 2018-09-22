@@ -1,34 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>baregunjsui p2p</title>
+		<title>Bare Gunjs UI P2P</title>
 		<meta name="description" content="A cool thing made with Glitch">
 		<link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/lib/time.js"></script>
-		<!--
-		<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/nts.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/lib/time.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/lib/then.js"></script>
-		-->
-		<!-- production version, optimized for size and speed -->
-		<!-- development version, includes helpful console warnings 
-		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
-		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-		<script src="/gun.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun@0.9.993/gun.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/gun@0.9.993/sea.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
-		-->
 		<script>
+			
 			var req = new XMLHttpRequest();
 			req.addEventListener("progress", function(event) {
 				//console.log('??', event.lengthComputable);
@@ -72,8 +52,10 @@
 			function progressbar(event){
 				console.log("loading...");
 			}
-
-    	</script>
+		</script>
+		<!--
+		<script src="/bundle.js"></script>
+		-->
     	<style>
 			.loader {
 				border: 16px solid #f3f3f3;
@@ -95,29 +77,12 @@
 			}
     	</style>
   	</head>
-  	<body>
-		<div id="loading">
-		<div class="loader"></div>
-		<span id="percent"> </span> Loading App...
-		<br><progress id="progressbar" value="0" max="100"></progress>
-		</div>
+	<body>
 		<div id="app"></div>
-    	<!-- include the Glitch button to show what the webpage is about and
-          to make it easier for folks to view source and remix 
-    	<div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
-    	<script src="https://button.glitch.me/button.js"></script>
-    	-->
-		<!-- import the webpage's client-side javascript file -->
-		<!--
-		<script id="progressbarid" onprogress="progressbar()" src="/bundle.js"></script>
-		-->
-		<script>
-			//document.body.addEventListener("load", (e)=>{
-				//console.log("progressbarid load?");
-			//});
-			window.addEventListener("load",(e)=>{
-				console.log("loaded?");
-			});
-		</script>
+		<div id="loading">
+			<div class="loader"></div>
+			<span id="percent"> </span> Loading App...
+			<br/><progress id="progressbar" value="0" max="100"></progress>
+		</div>
   	</body>
 </html>

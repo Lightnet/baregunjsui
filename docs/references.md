@@ -20,9 +20,46 @@
  * http://jsbin.com/qifuxarone/edit?js,console users list get
  * http://jsfiddle.net/KyleMit/v3QCW/ dialog zindex
 
-
-
  http://jsbin.com/nafukinumi/edit?js,console,output todolist simple
 
+```html
+    <!--
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun@0.9.993/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun@0.9.993/sea.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/nts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/time.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/lib/then.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.13.1/lodash.min.js"></script>
+    -->
+```
+
+
+```html
+    <!-- include the Glitch button to show what the webpage is about and
+        to make it easier for folks to view source and remix 
+    <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
+    <script src="https://button.glitch.me/button.js"></script>
+    -->
+    <!-- import the webpage's client-side javascript file -->
+    <!--
+    <script id="progressbarid" onprogress="progressbar()" src="/bundle.js"></script>
+    -->
+    <script>
+        //document.body.addEventListener("load", (e)=>{
+            //console.log("progressbarid load?");
+        //});
+        window.addEventListener("load",(e)=>{
+            console.log("loaded?");
+        });
+
+        //window.addEventListener('load',init);
+    </script>
+```
  
