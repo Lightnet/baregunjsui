@@ -1,3 +1,16 @@
+/*
+ Name: baregunjsui 
+
+ Created by: Lightnet
+ 
+ License: MIT
+
+ Credits:
+  * Mark Nadal @amark
+  * https://gitter.im/amark/gun
+
+*/
+
 //#region html view To Do List
 export var html_todolist = `
 	<div id="todolist_parent" style="height:100%;width:100%;">

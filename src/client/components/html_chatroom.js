@@ -1,3 +1,16 @@
+/*
+ Name: baregunjsui 
+
+ Created by: Lightnet
+ 
+ License: MIT
+
+ Credits:
+  * Mark Nadal @amark
+  * https://gitter.im/amark/gun
+
+*/
+
 //#region html view chat room
 export var html_chatroom = `
 <div id="chatroom_parent" style="height:100%;width:100%;">

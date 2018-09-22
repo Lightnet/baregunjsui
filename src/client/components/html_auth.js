@@ -1,3 +1,16 @@
+/*
+ Name: baregunjsui 
+
+ Created by: Lightnet
+ 
+ License: MIT
+
+ Credits:
+  * Mark Nadal @amark
+  * https://gitter.im/amark/gun
+
+*/
+
 import { html_aliasprofile } from './html_aliasprofile';
     
 //#region html view auth / main area

@@ -1,3 +1,16 @@
+/*
+ Name: baregunjsui 
+
+ Created by: Lightnet
+ 
+ License: MIT
+
+ Credits:
+  * Mark Nadal @amark
+  * https://gitter.im/amark/gun
+
+*/
+
 //#region html view password hint
 export var html_passwordhint = `
 <button id="authback">Back</button>

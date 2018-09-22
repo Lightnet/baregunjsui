@@ -14,7 +14,7 @@ Created by: Lightnet
 # Information:
   Design to be simple and to keep the files to bare minimal. To build simple peer to peer database messages system by developing Security, Encryption, and Authorization. By using jquery and jquery-ui, gun.js and gun.js libraries as base line just for client and simple server setup. The project has auto build script compiler that is being used for gulp, babel, webpack and other libraries to develop small but compact file. It can be install npm (node package manager) by command line for easy setup. The database is develop mode that not yet config yet for production. Simple access and post and private message system. The project has some simple examples to how gun.js works for peer to peer database with sea.js.
 
-  Current mode Development / Debug mode that is not config for production yet.
+  Current mode Development / production mode that is not config.
 
   By using jquery for creating element docs, query element id, and other for simple coding build. To get gun.js to load real time to almost direct access to database from server to client and peer to peer connections from other clients.
 

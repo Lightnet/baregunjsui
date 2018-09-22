@@ -1,3 +1,15 @@
+/*
+ Name: baregunjsui 
+
+ Created by: Lightnet
+ 
+ License: MIT
+
+ Credits:
+  * Mark Nadal @amark
+  * https://gitter.im/amark/gun
+
+*/
 // server.js
 // where your node app starts
 
@@ -70,8 +82,8 @@ var listener = app.listen(PORT, function () {
   //console.log(listener.address());
 });
 var bdatabase = process.env.BDatabase || false;
-console.log("bdatabase:",bdatabase);
-console.log(typeof(bdatabase))
+//console.log("bdatabase:",bdatabase);
+//console.log(typeof(bdatabase))
 //gun config here for database if need to be added.
 var gunconfig = {
   web:listener//server express

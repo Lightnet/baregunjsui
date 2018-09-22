@@ -39,24 +39,18 @@ import 'gun/lib/then';
 import { html_dialog_aliaskey } from './components/dialog_pubkey';
 import { html_dialog_alias } from './components/dialog_grantalias';
 import { html_message } from './components/message_effect';
-
 import { html_auth } from './components/html_auth';
 import { html_login } from './components/html_login';
-
-import { html_aliasprofile } from './components/html_aliasprofile';
+//import { html_aliasprofile } from './components/html_aliasprofile';
 import { html_passwordhint } from './components/html_passwordhint';
 import { html_changepasword } from './components/html_changepasword';
 import { html_forgot } from './components/html_forgot';
-import { html_contacts } from './components/html_contacts';
-
+//import { html_contacts } from './components/html_contacts';
 import { html_documents } from './components/html_documents';
 import { html_document } from './components/html_document';
-
 import { html_privatemessage } from './components/html_privatemessage';
 import { html_chatroom } from './components/html_chatroom';
-
 import { html_todolist } from './components/html_todolist';
-
 import { html_access } from './components/html_access';
 
 //#endregion
@@ -69,33 +63,33 @@ function init(){
 //(function(){
 	//'use strict';
 	//console.log('hello world :o');
-var gun;
-if(location.origin == 'http://localhost:3000'){
-	gun = Gun({
-		peers:['http://localhost:8080' + '/gun'],
-		secure: false, //not added?
+	var gun;
+	if(location.origin == 'http://localhost:3000'){
+		gun = Gun({
+			peers:['http://localhost:8080' + '/gun'],
+			secure: false, //not added?
+		});
+		console.log('local gun.js');
+	}else{
+		gun = Gun(location.origin + '/gun');
+		console.log('host gun.js');
+	}
+	var user = gun.user();
+	//console.log(user.pair());
+	//user.recall({sessionStorage: true});
+	//console.log(gun);
+	gun.on('hi', peer => {//peer connect
+		//console.log('connect peer to',peer);
+		console.log('peer connect!');
+		displayeffectmessage('Connect to peer!');
 	});
-	console.log('local gun.js');
-}else{
-	gun = Gun(location.origin + '/gun');
-	console.log('host gun.js');
-}
-var user = gun.user();
-//console.log(user.pair());
-//user.recall({sessionStorage: true});
-//console.log(gun);
-gun.on('hi', peer => {//peer connect
-	//console.log('connect peer to',peer);
-	console.log('peer connect!');
-	displayeffectmessage('Connect to peer!');
-});
-gun.on('bye', (peer)=>{// peer disconnect
-	//console.log('disconnected from', peer);
-	console.log('Disconnected from peer!');
-	//displayeffectmessage('Disconnected from peer!');
-});
-//gun.get('data').once(()=>{console.log("connect!");});
-//gun.get('data').put({text:'text'});
+	gun.on('bye', (peer)=>{// peer disconnect
+		//console.log('disconnected from', peer);
+		console.log('Disconnected from peer!');
+		//displayeffectmessage('Disconnected from peer!');
+	});
+	//gun.get('data').once(()=>{console.log("connect!");});
+	//gun.get('data').put({text:'text'});
 //===============================================
 // SEA.js
 //===============================================
@@ -152,7 +146,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#displaymessage').text(_msg);
 		runEffect();
 	}
-	//simple confirm dialog for search alias check key
+	//simple confirm dialog for search public key and check alias exist
 	$("#dialog-pub").dialog({
 		resizable: false,
 		height: "auto",
@@ -178,7 +172,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 			}
 		}
 	});
-	// grant access to alias to user info
+	// grant access to alias to user info (alias,born,education,skills)
 	$("#dialog-alias").dialog({
 		resizable: false,
 		height: "auto",
@@ -350,7 +344,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 		$('#authback').click(()=>{//back to main page
 			view_auth();
 		});
-		$('#pub').on('keyup', checkuserid); //input key check pub alias
+		$('#pub').on('keyup', checkuseridandmessages); //input key check pub alias
 		$('#message').on('keyup',(e)=>{ //listen user input key up event
 			e = e || window.event;
 			if (e.keyCode == 13) {//enter key
@@ -371,10 +365,13 @@ gun.on('bye', (peer)=>{// peer disconnect
 		//get contacts to up date the list
 		UpdateContactList();
 		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
-		$('#contacts').on('change',function(){
+		$('#contacts').on('change',async function(){
 			var id = $(this).find('option:selected').attr('id');
-			//console.log(id);
-			setpubkeyinput(id,'pub');
+			console.log(id);
+			let who = await user.get('contact').get(id).then() || {};
+			//setpubkeyinput(id,'pub');
+			$('#'+'pub').val(who.pub);
+			checkuseridandmessages();
 		});
 
 		$('#contactadd').on('click', ()=>{addcontact('pub')});
@@ -391,12 +388,12 @@ gun.on('bye', (peer)=>{// peer disconnect
 			user.leave();
 			view_login();
 		});
-		//get profile params and set input to value
+		//get profile params and set input to value.
 		profilesetdata('name');
 		profilesetdata('born');
 		profilesetdata('education');
 		profilesetdata('skills');
-		//grant access to info. Not yet worked on.
+		//grant access to info params.
 		profilegrantdata('name');
 		profilegrantdata('born');
 		profilegrantdata('education');
@@ -416,16 +413,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 			view_changepassword();
 		});
 
-		$('#profilesearch').on('keyup', searchuserid);//input type look up alias public key search
+		$('#profilesearch').on('keyup', searchprofiledata);//input type look up alias public key search
 
 		//update contact list 
 		UpdateContactList();
 		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
-		$('#contacts').on('change',function(){//select event list view info.
+		$('#contacts').on('change',async function(){//select event list view info.
 			//var id = $(this).children(":selected").attr("id");
 			var id = $(this).find('option:selected').attr('id');
 			//console.log(id);
-			setpubkeyinput(id,'profilesearch');
+			//setpubkeyinput(id,'profilesearch');
+			let who = await user.get('contact').get(id).then() || {};
+			$('#'+'profilesearch').val(who.pub);//set input public key
+			searchprofiledata();//update when selected alias
 		});
 
 		$('#contactremove').on('click', ()=>{removecontact('profilesearch')});
@@ -444,6 +444,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});
 	}
 
+//===============================================
+// Chat Message
+//===============================================
 	//Display html and setup Chat Room element.
 	function view_chatroom(){
 		let chatroom = gun.get('chatroom');
@@ -521,7 +524,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
 		return time;
 	}
-
+//===============================================
+// Text Document View/Add/Delete(?) 
+//===============================================
 	async function view_document(id){
 		$('#view').empty().append(html_document);//render html element
 		$('#iddoc').val(id);
@@ -653,7 +658,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 	}
 
 	window.deleteDocument = deleteDocument;
-
+//===============================================
+// To Do List
+//===============================================
 	//Display html and setup To Do List page.
 	async function view_todolist(){
 		$('#view').empty().append(html_todolist);//render element html
@@ -771,13 +778,17 @@ gun.on('bye', (peer)=>{// peer disconnect
 	async function setpubkeyinput(id,_name){
 		let who = await user.get('contact').get(id).then() || {};//get alias object data
 		//who.pub
-		$('#'+_name).val(who.pub);//set input public key 
-		if(_name == 'profilesearch'){
-			searchuserid();//update when selected alias
-		}else{
-			checkuserid();//update when selected alias
-		}
+		//$('#'+_name).val(who.pub);//set input public key
+		//if(_name == 'profilesearch'){
+			//searchuserid();//update when selected alias
+		//}else{
+			//checkuseridandmessages();//update when selected alias
+		//}
 	}
+//===============================================
+// Contacts
+//===============================================
+
 	//add alias public key
 	async function addcontact(_id){
 		//console.log("add contact...");
@@ -813,7 +824,7 @@ gun.on('bye', (peer)=>{// peer disconnect
 	//add contact list when call
 	function UpdateContactList(){
 		user.get('contact').once().map().once((data,id)=>{
-			//console.log(data);
+			console.log(data);
 			if(!data.name)//check for name to exist
 				return;
 			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');//check if option id exist else create.
@@ -827,6 +838,10 @@ gun.on('bye', (peer)=>{// peer disconnect
 			}
 		});
 	}
+
+//===============================================
+// Profile Data
+//===============================================
 	//grant access pub profile params
 	async function profilegrantdata(_name){
 		$('#g'+_name).click(()=>{//button click
@@ -869,6 +884,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		return val || _value;
 	}
 
+//===============================================
+// Passphrase Change / Hint
+//===============================================
 	//check change password call
 	function changeforgotpassword(){
 		var old = $('#oldpassword').val() || ''; //get old password input
@@ -935,6 +953,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		}
 		//console.log(hint);
 	}
+//===============================================
+// Auth User Login
+//===============================================
 	//login user auth check
 	function authalias(_alias,_passphrase){
 		//console.log(user.is);
@@ -953,6 +974,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 			}
 		});
 	}
+//===============================================
+// Create User Alias
+//===============================================	
 	// create user account
 	function createalias(_alias,_passphrase){
 		user.create(_alias,_passphrase,(ack)=>{//sea.js user create account
@@ -969,8 +993,11 @@ gun.on('bye', (peer)=>{// peer disconnect
 			}
 		});
 	}
+//===============================================
+// ProfileLoop Up
+//===============================================
 	//search alias profile information
-	async function searchuserid(e){
+	async function searchprofiledata(e){
 		if(!user.is){ return }//check if not user exist
 		GetProfileParam('name');
 		GetProfileParam('born');
@@ -980,10 +1007,19 @@ gun.on('bye', (peer)=>{// peer disconnect
 
 	async function GetProfileParam(_name){
 		let pub = $('#profilesearch').val();//get input value
+		if(!pub){
+			return;
+		}
 		var find = gun.user(pub);
-
-		//let data_name = await find.get('profile').get('name').then(); //get alisa name
-		//console.log(data_name);
+		//console.log(find);
+		let who = await find.then() || {};//get alias information
+		console.log(who);
+		if(!who.alias){//check for alias from gun user
+			$('#searchstatus').text('No Alias!');
+			return;
+		}else{
+			$('#searchstatus').text('Found! ' + who.alias);
+		}
 
 		find.get('profile').on(function(data, key, at, ev){
 			Gun.node.is(data, async function(v, k){
@@ -992,19 +1028,18 @@ gun.on('bye', (peer)=>{// peer disconnect
 					var key = await find.get('trust').get(user.pair().pub).get(k+'profile').then();
       				var mix = await Gun.SEA.secret(await find.get('epub').then(), user.pair());
 					key = await Gun.SEA.decrypt(key, mix);
-					console.log(v);
+					//console.log(v);
 					var val = await Gun.SEA.decrypt(v, key);
 
 					//console.log(val || v);
-					$('#a'+_name).val(val || v);
-					  
+					$('#a'+_name).val(val || v); // alias, born, education, skills
 				}
 			});
 		});
 	}
 
 	//check Alias, clear message and add messages
-	async function checkuserid(e){
+	async function checkuseridandmessages(e){
 		if(!user.is){ return }//if not user exist
 		$('#messages').empty(); //clear messages list element
 		//console.log('test');
@@ -1050,7 +1085,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 			PrivateMessageUI(say,id,dec,who.alias);
 		});
 	}
-
+//===============================================
+// Private Message
+//===============================================
 	// Display Private Message
 	async function PrivateMessageUI(data, id, dec, who){//data, key, decrypt key
 		let say = data.message;
@@ -1296,6 +1333,9 @@ gun.on('bye', (peer)=>{// peer disconnect
 		});//add message list
 		console.log("end message send!");
 	}
+//===============================================
+// Init Render html
+//===============================================	
 	//init render!
 	//view_login();
 	//https://stackoverflow.com/questions/49519571/gun-v0-9-92-using-sea-cant-put-nested-data-when-not-logged-in
