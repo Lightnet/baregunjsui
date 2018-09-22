@@ -15,6 +15,10 @@ import { html_aliasprofile } from './html_aliasprofile';
     
 //#region html view auth / main area
 export var html_auth = `
+<span id="alias">User Alias</span>
+<br/><span>Public Key: <input id="publickey" style="width:700px;" readonly> </span>
+<button id="copykey">Copy Key</button>
+<br/>
 <button id="logout" style="float:right;">Logout</button>
 <button id="passwordhint">Password Hint</button>
 <button id="changepassword">Change Password</button>
@@ -22,10 +26,7 @@ export var html_auth = `
 <button id="documents">Documents</button>
 <button id="chatroom">Chat Room</button>
 <button id="todolist">To Do List</button>
-<br><span id="alias">User Alias</span>
-<br><span>Public Key: <input id="publickey" style="width:700px;" readonly> </span>
-<button id="copykey">Copy Key</button>
-<br>
+<br/>
 <table><tr><td>
     <label>Name:</label>
     </td><td>

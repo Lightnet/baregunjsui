@@ -8,11 +8,28 @@ html, body {
 body.light {
 	--text-color: white;
 	--bg-color: black;
+	--bg-color--button:lightgray ;
 }
 //theme dark
 body.dark {
 	--text-color: black;
 	--bg-color: white;
+	--bg-color--button: gray;
+}
+
+select{
+	background-color: var(--bg-color--button);
+	color: var(--bg-color);
+}
+
+button{
+	background-color: var(--bg-color--button);
+	color: var(--bg-color);
+}
+
+input{
+	background-color: var(--text-color);
+	color: var(--bg-color);
 }
 
 body {
