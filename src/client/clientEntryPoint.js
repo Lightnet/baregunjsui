@@ -670,20 +670,12 @@ function init(){
 			//user.get('todolist').off(); //does it turn off?
 			view_auth();
 		});
-		//console.log(Gun.text.random(32));
-		//let todolistid = await user.get('todolist').get('key').then();
-		//console.log(todolistid);
-		//if(!todolistid){
-			//user.get('todolist').get('key').put(Gun.text.random(32));
-			//todolistid = await user.get('todolist').get('key').then();
-			//console.log(todolistid);
-		//}	
 
 		$('#todolist').empty();//empty list
 		//gun.get(todolistid).get('todolist').map().on((data,id)=>{
-		gun.user().get('todolist').map().on((data,id)=>{
-			//console.log(id);
-			//console.log(data);
+			gun.get('todolist').map().on((data,id)=>{
+			console.log(id);
+			console.log(data);
 			feedtodolist(data,id);//add list items
 		});
 
@@ -737,8 +729,8 @@ function init(){
 			//console.log("enter?");
 			//gun.get(todolistid).get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});//update key and put text data
 			let id = $(element).parent().parent().attr('id');
-			conole.log(id);
-			gun.user().get('todolist').get(id).put({text: $(element).val()});//update key and put text data
+			console.log(id);
+			gun.get('todolist').get(id).put({text: $(element).val()});//update key and put text data
 			//get input value
 			let val = $(element).val();//get value
 			element = $(element);//change to jquery for access functions
@@ -752,7 +744,7 @@ function init(){
 		let text = ($('#inputtodolist').val() || '').trim(); //get input and clean up string
 		console.log('add?',text);
 		//gun.get(todolistid).get('todolist').set({text:text,done:'false'},ack=>{//add object id data to gun database
-		user.get('todolist').set({text:text, done:'false'},ack=>{//add object id data to gun database
+		gun.get('todolist').set({text:text, done:'false'},ack=>{//add object id data to gun database
 			//console.log('todolist:',ack);
 			$('#inputtodolist').val('');//clear text string
 		});
@@ -762,14 +754,10 @@ function init(){
 		//let todolistid = await user.get('todolist').get('key').then();
 		let id = $(element).parent().attr('id');//get id that is from gun.get(data,id)
 		console.log(id);
-		
-
 		//id = id.substring(0,id.length -1);
-
 		console.log(id);
-
 		//user.get('todolist').get(id).put(null);
-		gun.user().get('todolist').get(id).put('null',ack=>{
+		gun.get('todolist').get(id).put('null',ack=>{
 			//console.log(ack);
 			if(ack.ok){//hide li
 				$(element).parent().hide();
@@ -778,11 +766,11 @@ function init(){
 	}
 
 	async function todolistCheck (element) {
-		let todolistid = await user.get('todolist').get('key').then();
+		//let todolistid = await user.get('todolist').get('key').then();
 		let strbool = $(element).prop('checked');
 		strbool = strbool.toString();
 		//gun.get(todolistid).get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
-		gun.user().get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
+		gun.get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
 	}
 	window.todolistTitle = todolistTitle;//set window global to call outside
 	window.keypressToDoListTitle = keypressToDoListTitle;
