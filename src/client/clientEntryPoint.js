@@ -704,6 +704,7 @@ function init(){
 		if(li){//check for exist
 			if((data == null)||(data == 'null')){//check if data is empty
 				$(li).hide();//hide list
+				return;
 			}
 			$(li).empty();//empty groups element
 			let bdone = false;//set for check input
@@ -763,7 +764,7 @@ function init(){
 		id = id + '.';
 		console.log(id);
 		//user.get('todolist').get(id).put(null);
-		user.get('todolist').get(id).put('null',ack=>{
+		user.get('todolist').get(id).put(null,ack=>{
 			//console.log(ack);
 			if(ack.ok){//hide li
 				$(element).parent().hide();
