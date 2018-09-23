@@ -380,6 +380,12 @@ function init(){
 	//display and setup auth page.
 	async function view_auth(){
 		$('#view').empty().append(html_auth);//render html element
+		//console.log(user.is);
+		if(user.is == null){
+			//view_login();
+			location.reload();
+			return;
+		}
 		$('#alias').text('Alias: '+user.is.alias);//get current user name
 		$('#publickey').val(user.is.pub);//get user public key
 		$('#displayAlias').text('Alias: '+user.is.alias);//get current user name

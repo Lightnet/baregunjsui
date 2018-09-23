@@ -42,6 +42,9 @@ Created by: Lightnet
  * Some minor bug on gun.user() function calls from sea.js might not work in some areas.
  * Load time data may be slow on time graph or other libraries.
 
+# Sea.js
+ * map set key has end prefix xxx.xxx-xxx. dot if your using jquery it error fail to add id tag.
+
 # Bugs:
  * Connect and disconnect button is what doesn't work some condtions.
  * gun.user there might be some bug that doesn't load correctly. null and boolean are not working for some reason to set variable into graph. But not using sea.js it works.

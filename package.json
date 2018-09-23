@@ -27,7 +27,7 @@
     "file-loader": "1.1.11",
     "gulp": "3.9.1",
     "gulp-live-server": "0.0.31",
-    "gun": "0.9.99993",
+    "gun": "0.9.99994",
     "gun-mongo": "0.1.2",
     "helmet": "3.12.1",
     "jquery": "3.3.1",
