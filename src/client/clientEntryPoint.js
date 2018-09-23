@@ -667,13 +667,13 @@ function init(){
 		//set scroll
 		setupscrollparentc1c2("todolist_parent","todolist_child1","todolist_child2");
 		$('#authback').click(()=>{//return main page
-			//user.get('todolist').off(); //does it turn off?
+			gun.get('todolist').map().off(); //does it turn off?
 			view_auth();
 		});
 
 		$('#todolist').empty();//empty list
 		//gun.get(todolistid).get('todolist').map().on((data,id)=>{
-			gun.get('todolist').map().on((data,id)=>{
+		user.get('todolist').map().on((data,id)=>{
 			console.log(id);
 			console.log(data);
 			feedtodolist(data,id);//add list items
@@ -694,6 +694,8 @@ function init(){
 	function feedtodolist(data,id){
 		let li;//null variable
 		//console.log(id);
+		id = id.substring(0,id.length - 1);
+		//console.log(data);
 		if(document.getElementById(id)){//check for id exist
 			li = $('#' + id).get(0);//call li id
 		}else{
@@ -730,7 +732,8 @@ function init(){
 			//gun.get(todolistid).get('todolist').get($(element).parent().parent().attr('id')).put({text: $(element).val()});//update key and put text data
 			let id = $(element).parent().parent().attr('id');
 			console.log(id);
-			gun.get('todolist').get(id).put({text: $(element).val()});//update key and put text data
+			id = id + '.';
+			user.get('todolist').get(id).put({text: $(element).val()});//update key and put text data
 			//get input value
 			let val = $(element).val();//get value
 			element = $(element);//change to jquery for access functions
@@ -743,8 +746,9 @@ function init(){
 		//let todolistid = await user.get('todolist').get('key').then();
 		let text = ($('#inputtodolist').val() || '').trim(); //get input and clean up string
 		console.log('add?',text);
+
 		//gun.get(todolistid).get('todolist').set({text:text,done:'false'},ack=>{//add object id data to gun database
-		gun.get('todolist').set({text:text, done:'false'},ack=>{//add object id data to gun database
+		user.get('todolist').set({text:text, done:'false'},ack=>{//add object id data to gun database
 			//console.log('todolist:',ack);
 			$('#inputtodolist').val('');//clear text string
 		});
@@ -756,8 +760,10 @@ function init(){
 		console.log(id);
 		//id = id.substring(0,id.length -1);
 		console.log(id);
+		id = id + '.';
+		console.log(id);
 		//user.get('todolist').get(id).put(null);
-		gun.get('todolist').get(id).put('null',ack=>{
+		user.get('todolist').get(id).put('null',ack=>{
 			//console.log(ack);
 			if(ack.ok){//hide li
 				$(element).parent().hide();
@@ -769,8 +775,10 @@ function init(){
 		//let todolistid = await user.get('todolist').get('key').then();
 		let strbool = $(element).prop('checked');
 		strbool = strbool.toString();
+		let id = $(element).parent().attr('id');
+		id = id + '.';
 		//gun.get(todolistid).get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
-		gun.get('todolist').get($(element).parent().attr('id')).put({done:strbool})//update check boolean to string
+		user.get('todolist').get(id).put({done:strbool})//update check boolean to string
 	}
 	window.todolistTitle = todolistTitle;//set window global to call outside
 	window.keypressToDoListTitle = keypressToDoListTitle;
