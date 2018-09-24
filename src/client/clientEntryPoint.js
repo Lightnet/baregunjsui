@@ -982,12 +982,12 @@ function init(){
 			//console.log(ack);
 			//console.log("created!", ack.pub);
 			if(ack.err){
-				//console.log(ack.err);
+				console.log(ack.err);
 				displayeffectmessage(ack.err);//display message if fail to login auth
 				return;
 			}
 			if(ack.pub){
-				//console.log("Login Pass! Pub:", ack.pub);
+				console.log("Login Pass! Pub:", ack.pub);
 				displayeffectmessage('Login Auth!');//display message login auth 
 				view_auth();//go to render auth html element
 			}
