@@ -810,25 +810,37 @@ function init(){
 
 	//add alias public key
 	async function addcontact(_id){
-		//console.log("add contact...");
+		console.log("add contact...");
 		let pub = ($('#'+_id).val() || '').trim();//get public key and clean up space
 		if(!pub) return;//if empty string
-		//console.log(pub);
+		console.log(pub);
 		let to = gun.user(pub);//get alias if exist
 		let who = await to.then() || {};//get alias information
+		console.log(who);
 		if(!who.alias){//if not alias name exist do not run next line
+			console.log("empty!");
 			return;
 		}
-		let bfound = await user.get('contact').get(who.alias).then();//get alias name check exist
+		console.log("checking...");
+		//let bfound = await user.get('contact').get(who.alias).then();//get alias name check exist
+		//user.get('contact').get(who.alias).once((data)=>{
+			//console.log(data);
+		//});
+		//let bfound = await user.get('contact').get(who.alias).then();//get alias name check exist
+		//console.log('bfound',bfound);
+		//console.log('bfound');
 		//console.log(bfound);
-		if((!bfound)||(bfound == 'null')){
+		//if((!bfound)||(bfound == 'null')){
 			$('<option>').attr('id', who.alias).text(who.alias).appendTo('#contacts');//add html option select element
 			user.get('contact').get(who.alias).put({name:who.alias,pub:who.pub});//add user data to contact list
-		}
+			console.log('add')
+		//}else{
+			//console.log('other?')
+		//}
 	}
 	//remove alias contact
 	async function removecontact(_id){
-		//console.log("remove");
+		console.log("remove");
 		let pub = ($('#'+_id).val() || '').trim(); // remove space 
 		if(!pub) return;//check empty then do not run next line
 		let to = gun.user(pub);//from alias public key get user data
@@ -842,8 +854,9 @@ function init(){
 	}
 	//add contact list when call
 	function UpdateContactList(){
-		user.get('contact').once().map().once((data,id)=>{
-			//console.log(data);
+		console.log('update contact');
+		user.get('contact').map().once((data,id)=>{
+			console.log(data);
 			if(!data.name)//check for name to exist
 				return;
 			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');//check if option id exist else create.
@@ -1128,7 +1141,14 @@ function init(){
 		//console.log(id);
 		//var li = $('#' + id).get(0)
 		
-		var li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul'); //check id element exist else create element id
+		//let li = $('#' + id).get(0) || $('<li>').attr('id', id).appendTo('ul'); //check id element exist else create element id
+		let li;
+		if(document.getElementById(id)){//check for id exist
+			li = $('#' + id).get(0);//call li id
+		}else{
+			li = $('<li>').attr('id', id).appendTo('ul');//create new li
+		}
+
 		if(say){
 			if(say == 'null'){//if say is null then hide element
 				$(li).hide();	
@@ -1271,21 +1291,21 @@ function init(){
 		
 		let strbool = $(element).prop('checked');
 		strbool = strbool.toString();
-		console.log("boolstr:",typeof(strbool));
+		//console.log("boolstr:",typeof(strbool));
 		let pub = $('#pub').val();
 		let to = gun.user(pub);
 
-		let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
-		let userprivatemessageid = await user.get('privatemessage').get('key').then();
-		if(!aliasprivatemessageid) return;
+		//let aliasprivatemessageid = await to.get('privatemessage').get('key').then();
+		//let userprivatemessageid = await user.get('privatemessage').get('key').then();
+		//if(!aliasprivatemessageid) return;
 
 		//user.get('message').get(pub).get(id).once((data)=>{
-		gun.get(userprivatemessageid).get('message').get(pub).get(id).once((data)=>{
+		user.get('message').get(pub).get(id).once((data)=>{
 			//console.log(data);
 			//console.log(id);
 			if(data!=null){
 				//user.get('message').get(pub).get(id).put({isread:strbool},ack=>{
-				gun.get(userprivatemessageid).get('message').get(pub).get(id).put({isread:strbool},ack=>{
+				user.get('message').get(pub).get(id).put({isread:strbool},ack=>{
 					console.log(ack);
 					if(ack.err){
 						return;
@@ -1298,13 +1318,13 @@ function init(){
 
 		// from Alias
 		//to.get('message').get(user.pair().pub).get(id).once((data)=>{
-		gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).once((data)=>{
+		to.get('message').get(user.pair().pub).get(id).once((data)=>{
 			//console.log("to chat");
 			if(data!=null){
 				//not working to delete
 				//to.get('message').get(user.pair().pub).get(id).put(null,ack=>{ 
 				//to.get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
-				gun.get(aliasprivatemessageid).get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
+				to.get('message').get(user.pair().pub).get(id).put({isread:strbool}, ack=>{
 					console.log(ack);
 					if(ack.err){
 						return;

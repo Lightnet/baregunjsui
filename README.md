@@ -52,7 +52,6 @@ Created by: Lightnet
 # Project Links:
  * https://glitch.com/edit/#!/baregunjsui
  * https://baregunjsui.glitch.me
- * https://glitch.com/edit/#!/join/ec14bb2a-51d2-46f8-b017-90a225280311
  * https://github.com/Lightnet/baregunjsui
  
 # Links:
