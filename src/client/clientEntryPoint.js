@@ -367,13 +367,12 @@ function init(){
 		//https://stackoverflow.com/questions/2888446/get-the-selected-option-id-with-jquery
 		$('#contacts').on('change',async function(){
 			var id = $(this).find('option:selected').attr('id');
-			console.log(id);
+			//console.log(id);
 			let who = await user.get('contact').get(id).then() || {};
 			$('#'+'pub').val(who.pub);
-			console.log(who.pub);
+			//console.log(who.pub);
 			checkuseridandmessages();
 		});
-
 		$('#contactadd').on('click', ()=>{addcontact('pub')});
 		$('#contactremove').on('click',()=>{removecontact('pub')});
 	}
@@ -536,19 +535,23 @@ function init(){
 	async function view_document(id){
 		$('#view').empty().append(html_document);//render html element
 		$('#iddoc').val(id);
+
+		console.log("data???");
+		user.get('document').get(id+'.').once((data)=>{
+			//console.log(data);
+			//$('#documentcontent').val();
+			$('#documentcontent').val(data.content);
+		})
+
 		$('#authback').click(()=>{//back to main page
 			view_auth();
 		});
+		
+		setupscrollparentc1c2("document_parent","document_child1","document_child2");//setup scroll
+
 		$('#documentsback').click(()=>{//back to main page
 			view_documents();
 		});
-
-		setupscrollparentc1c2("document_parent","document_child1","document_child2");//setup scroll
-
-		let documentkey = await user.get('document').get('key').then();
-
-		let content = await gun.get(documentkey).get(id).get('content').then();
-		$('#documentcontent').val(content);
 
 		$('#savedocument').click(async ()=>{
 			let content = $('#documentcontent').val();
@@ -556,7 +559,10 @@ function init(){
 			console.log(content);
 			//let id = $('#iddoc').val();
 			//if(!id) return;
-			gun.get(documentkey).get(id).put({content:content},ack=>{
+			//gun.get(documentkey).get(id).put({content:content},ack=>{
+			id = id + '.';
+
+			user.get('document').get(id).put({content:content},ack=>{
 				if(ack.err){
 					displayeffectmessage(ack.err);
 					return;
@@ -577,11 +583,11 @@ function init(){
 		
 		setupscrollparentc1c2("document_parent","document_child1","document_child2");//setup scroll
 
-		let documentkey = await user.get('document').get('key').then();
-		if(!documentkey){
-			user.get('document').get('key').put(Gun.text.random(32));
-			documentkey = await user.get('document').get('key').then();
-		}
+		//let documentkey = await user.get('document').get('key').then();
+		//if(!documentkey){
+			//user.get('document').get('key').put(Gun.text.random(32));
+			//documentkey = await user.get('document').get('key').then();
+		//}
 
 		updateDocumentList();
 
@@ -591,15 +597,19 @@ function init(){
 	}
 
 	async function updateDocumentList(){
-		let documentkey = await user.get('document').get('key').then();
-		console.log(documentkey);
-		gun.get(documentkey).map().once((data,id)=>{
+		//let documentkey = await user.get('document').get('key').then();
+		//console.log(documentkey);
+		//gun.get(documentkey).map().once((data,id)=>{
+		user.get('document').map().once((data,id)=>{
 			console.log(data);
 			//$('#documentlist');
+			id = id.substring(0,id.length - 1)
 			var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#documentlist'); //check id element exist else create element id
 			if(div){
-				if((data == null)||(data == 'null'))
+				if((data == null)||(data == 'null')){
 					$(div).hide();
+					return;
+				}
 				$(div).empty(); //empty element
 				$('<span onclick="editNameDocument(this)">').text(data.name).appendTo(div); //display text 
 				$('<button onclick="editDocument(this)">').text(' Edit ').appendTo(div); //display text 
@@ -612,9 +622,10 @@ function init(){
 	}
 
 	async function newDocument(){
-		let documentkey = await user.get('document').get('key').then();
+		//let documentkey = await user.get('document').get('key').then();
 		//Gun.text.random(32)
-		gun.get(documentkey).set({name:'untitled',content:'null',public:'null',private:'null'});
+		//gun.get(documentkey).set({name:'untitled',content:'null',public:'null',private:'null'});
+		user.get('document').set({name:'untitled',content:'null',public:'null',private:'null'});
 	}
 
 	async function editNameDocument(element){
@@ -652,10 +663,12 @@ function init(){
 	window.editDocument = editDocument;
 
 	async function deleteDocument(element){
-		let documentkey = await user.get('document').get('key').then();
+		//let documentkey = await user.get('document').get('key').then();
 		let id = $(element).parent().attr('id');
 		console.log(id);
-		gun.get(documentkey).get(id).put('null',ack=>{
+		id = id + '.'
+		//gun.get(documentkey).get(id).put('null',ack=>{
+		user.get('document').get(id).put(null,ack=>{
 			console.log(ack);
 			if(ack.ok){
 				$(element).parent().remove();
