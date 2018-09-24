@@ -7,6 +7,11 @@
             "type": "gulp",
             "task": "default",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "start",
+            "problemMatcher": []
         }
     ]
 }

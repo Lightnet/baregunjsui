@@ -821,7 +821,8 @@ function init(){
 			console.log("empty!");
 			return;
 		}
-		console.log("checking...");
+		//console.log("checking...");
+		//Odd bug that varaible not loading here.
 		//let bfound = await user.get('contact').get(who.alias).then();//get alias name check exist
 		//user.get('contact').get(who.alias).once((data)=>{
 			//console.log(data);
@@ -882,15 +883,13 @@ function init(){
 	}
 	//setup get and set profile params
 	async function profilesetdata(_name){
-		let data = await user.get('profile').get(_name).then(); //get profile param variable
-		//$('#'+_name).val(data); //set profile param variable
-		let value = await getprofilevar(_name,data);
-		//console.log(value);
-		$('#'+_name).val(value || data);
+		console.log("PROFILE DATA:",_name);
+		
 		$('#'+_name).on('keyup', function(e){ //keyboard event input
 			if(!user.is){ return } //check for user auth
 			//user.get('profile').get(_name).put($('#'+_name).val()); //from user data to update profile param variable
 			if (e.keyCode == 13) {//enter key
+				console.log("enter...");
 				user.get('profile').get(_name).secret($('#'+_name).val(),ack=>{
 					console.log(ack);
 				});
@@ -898,9 +897,17 @@ function init(){
 			}
 			return true;
 		});
+
+		let data = await user.get('profile').get(_name).then(); //get profile param variable
+		//$('#'+_name).val(data); //set profile param variable
+		console.log("checking...:",_name);
+		let value = await getprofilevar(_name,data);
+		console.log(value);
+		$('#'+_name).val(value || data);
 	}
 
 	async function getprofilevar(_name,_value){
+		console.log('getprofilevar')
 		let pkey = await user.get('trust').get(user.pair().pub).get(_name+'profile').then();
 
 		//user.get('trust').get(user.pair().pub).once((data,id)=>{
@@ -1031,13 +1038,14 @@ function init(){
 	//search alias profile information
 	async function searchprofiledata(e){
 		if(!user.is){ return }//check if not user exist
-		GetProfileParam('name');
-		GetProfileParam('born');
-		GetProfileParam('education');
-		GetProfileParam('skills');
+		//GetProfileParam('name');
+		//GetProfileParam('born');
+		//GetProfileParam('education');
+		//GetProfileParam('skills');
+		GetProfileParam();
 	}
 
-	async function GetProfileParam(_name){
+	async function GetProfileParam(){
 		let pub = $('#profilesearch').val();//get input value
 		if(!pub){
 			return;
@@ -1045,18 +1053,19 @@ function init(){
 		var find = gun.user(pub);
 		//console.log(find);
 		let who = await find.then() || {};//get alias information
-		console.log(who);
+		//console.log(who);
 		if(!who.alias){//check for alias from gun user
 			$('#searchstatus').text('No Alias!');
 			return;
 		}else{
 			$('#searchstatus').text('Found! ' + who.alias);
 		}
-
+		console.log("profile data")
 		find.get('profile').on(function(data, key, at, ev){
+			console.log("profile");
 			Gun.node.is(data, async function(v, k){
-				//console.log('k:',k);
-				if(k == _name){
+				console.log('k:',k);
+				//if(k == _name){
 					var key = await find.get('trust').get(user.pair().pub).get(k+'profile').then();
       				var mix = await Gun.SEA.secret(await find.get('epub').then(), user.pair());
 					key = await Gun.SEA.decrypt(key, mix);
@@ -1064,11 +1073,26 @@ function init(){
 					var val = await Gun.SEA.decrypt(v, key);
 
 					//console.log(val || v);
-					$('#a'+_name).val(val || v); // alias, born, education, skills
-				}
+					if(k == 'name'){
+						$('#a'+'name').val(val || v); // alias, born, education, skills
+					}
+					if(k == 'born'){
+						$('#a'+'born').val(val || v); // alias, born, education, skills
+					}
+					if(k == 'education'){
+						$('#a'+'education').val(val || v); // alias, born, education, skills
+					}
+					if(k == 'skills'){
+						$('#a'+'skills').val(val || v); // alias, born, education, skills
+					}
+				//}
 			});
 		});
 	}
+
+//===============================================
+// Private Message
+//===============================================
 
 	//check Alias, clear message and add messages
 	async function checkuseridandmessages(e){
@@ -1126,9 +1150,7 @@ function init(){
 		});
 		
 	}
-//===============================================
-// Private Message
-//===============================================
+
 	// Display Private Message
 	async function PrivateAddMessageUI(data, id, dec, who){//data, key, decrypt key
 		let say = data.message;

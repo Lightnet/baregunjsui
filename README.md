@@ -4,6 +4,9 @@ Created by: Lightnet
 
 # License: MIT
 
+# Note:
+ * some section code are not working.
+
 # Required:
  * Nodejs
 
