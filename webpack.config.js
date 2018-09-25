@@ -3,7 +3,7 @@ const fs = require('fs');
 
 module.exports = {
     mode:'development',
-    entry:  ['babel-polyfill','./src/client/clientEntryPoint.js'],
+    entry:  ['@babel/polyfill','./src/client/clientEntryPoint.js'],
     output: {
         path: path.join(__dirname, 'public'),
         filename: 'bundle.js'
@@ -33,7 +33,7 @@ module.exports = {
                 ],
                 loader: 'babel-loader',
                 query: {
-                    presets: ['babel-preset-env'].map(require.resolve)
+                    presets: ["@babel/preset-env"].map(require.resolve)
                 }
             },
             {
