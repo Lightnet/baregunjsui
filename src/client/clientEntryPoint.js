@@ -601,7 +601,7 @@ function init(){
 		//console.log(documentkey);
 		//gun.get(documentkey).map().once((data,id)=>{
 		user.get('document').map().once((data,id)=>{
-			console.log(data);
+			//console.log(data);
 			//$('#documentlist');
 			id = id.substring(0,id.length - 1)
 			var div = $('#' + id).get(0) || $('<div>').attr('id', id).appendTo('#documentlist'); //check id element exist else create element id
@@ -693,8 +693,8 @@ function init(){
 		$('#todolist').empty();//empty list
 		//gun.get(todolistid).get('todolist').map().on((data,id)=>{
 		user.get('todolist').map().on((data,id)=>{
-			console.log(id);
-			console.log(data);
+			//console.log(id);
+			//console.log(data);
 			feedtodolist(data,id);//add list items
 		});
 
@@ -857,7 +857,7 @@ function init(){
 	function UpdateContactList(){
 		console.log('update contact');
 		user.get('contact').map().once((data,id)=>{
-			console.log(data);
+			//console.log(data);
 			if(!data.name)//check for name to exist
 				return;
 			var option = $('#' + id).get(0) || $('<option>').attr('id', id).appendTo('#contacts');//check if option id exist else create.
@@ -897,6 +897,14 @@ function init(){
 			}
 			return true;
 		});
+
+		user.get('profile').get(_name).once((data)=>{
+			console.log(data);
+		})
+
+		gun.get('profile').get(_name).once((data)=>{
+			console.log(data);
+		})
 
 		let data = await user.get('profile').get(_name).then(); //get profile param variable
 		//$('#'+_name).val(data); //set profile param variable

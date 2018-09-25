@@ -45,7 +45,7 @@ const commonModulejs = {
             ],
             loader: 'babel-loader',
             query: {
-                presets: ['babel-preset-env'].map(require.resolve)
+                presets: ['@babel/preset-env'].map(require.resolve)
             }
         },
         {
@@ -62,7 +62,8 @@ const commonModulejs = {
 /* FRONT-END CONFIG */
 var frontWebpackConfig = {
     mode: "development",
-    entry: ['babel-polyfill','./src/client/clientEntryPoint.js'],
+    entry: ['@babel/polyfill','./src/client/clientEntryPoint.js'],
+    //entry: ['./src/client/clientEntryPoint.js'],
     output: {
         path: path.join(__dirname, 'public'),
         filename: 'bundle.js'
@@ -84,7 +85,7 @@ const commonModule = {
             use: {
                 loader: 'babel-loader',
                 options: {
-                    presets: ['babel-preset-env'],
+                    presets: ["@babel/preset-env"],
                 },
             },
         },

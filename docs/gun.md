@@ -104,3 +104,11 @@ Links:
 subscribe
 
 ```
+
+
+gun._.on('eventType', callbackListener)
+
+
+Gun.on('create', function(root){
+  this.to.next(root);
+  root.on('put', function(msg){
