@@ -6,3 +6,4 @@ package-lock.json
 public/bundle.js
 public/*.png
 rundb.bat
+data
