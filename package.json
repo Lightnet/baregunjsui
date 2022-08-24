@@ -1,85 +1,23 @@
 {
-  "//1": "describes your app and its dependencies",
-  "//2": "https://docs.npmjs.com/files/package.json",
-  "//3": "updating this file will download and update your packages",
   "name": "baregunjsui",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple Node app with gundb as a database management system, instantly up and running.",
-  "main": "main.js",
+  "main": "server.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "start": "webpack && babel-node main.js --host 0.0.0.0",
-    "watch": "webpack --watch"
-  },
-  "dependencies": {
-    "@babel/cli": "^7.1.0",
-    "@babel/core": "^7.1.0",
-    "@babel/node": "^7.0.0",
-    "@babel/plugin-transform-runtime": "^7.1.0",
-    "@babel/polyfill": "^7.0.0",
-    "@babel/preset-env": "^7.1.0",
-    "@babel/runtime": "^7.0.0",
-    "@babel/runtime-corejs2": "^7.0.0",
-    "babel-loader": "^8.0.2",
-    "babel-plugin-module-resolver": "^3.1.1",
-    "browser-sync": "^2.24.7",
-    "css-loader": "^0.28.11",
-    "curl": "^0.1.4",
-    "dotenv": "^5.0.1",
-    "ejs": "^2.6.1",
-    "express": "^4.16.3",
-    "file-loader": "^1.1.11",
-    "gulp": "^3.9.1",
-    "gulp-live-server": "^0.0.31",
-    "gun": "^0.9.99994",
-    "gun-mongo": "^0.1.2",
-    "helmet": "^3.13.0",
-    "jquery": "^3.3.1",
-    "jquery-ui": "^1.12.1",
-    "lodash": "^4.17.11",
-    "moment": "^2.22.2",
-    "node-sass": "^4.9.3",
-    "raw-loader": "^0.5.1",
-    "sass-loader": "^7.1.0",
-    "style-loader": "^0.21.0",
-    "webpack": "^4.20.1",
-    "webpack-bundle-analyzer": "^3.0.2",
-    "webpack-cli": "^3.1.1",
-    "webpack-dev-server": "^3.1.9",
-    "webpack-node-externals": "^1.7.2"
-  },
-  "engines": {
-    "node": "8.x"
-  },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/hello-sqlite"
-  },
-  "license": "MIT",
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "modules": false
-        }
-      ]
-    ],
-    "plugins": [
-      [
-        "module-resolver",
-        {
-          "root": [
-            "./src"
-          ],
-          "alias": {}
-        }
-      ]
-    ]
+    "dev": "node server.js"
   },
   "keywords": [
-    "node",
-    "glitch",
-    "express",
-    "gundb"
+    "gunjs",
+    "seajs"
   ],
-  "devDependencies": {}
+  "author": "Lightnet",
+  "license": "MIT",
+  "dependencies": {
+    "gun": "^0.2020.1238"
+  }
 }
+
