@@ -13,6 +13,10 @@ gun.on('bye', (peer)=>{// peer disconnect
   //console.log('disconnected from peer!');
 });
 
+//console.log(String.random(16))
+// https://github.com/amark/gun/blob/master/gun.js#L260
+//console.log(Gun.state.is)
+
 import {
   createSignal
 , createEffect
@@ -65,11 +69,17 @@ const PageNavMenu = () =>{
     dispose();
     dispose = render(PageTestLab, document.getElementById('app'));
   }
+  function btnGunGraph(e){
+    e.preventDefault();
+    dispose();
+    dispose = render(PageGunGraph, document.getElementById('app'));
+  }
 
   return html`<div>
   <a href="#" onClick="${btnAccount}"> Account </a> <span> | </span>
   <a href="#" onClick="${btnPrivateMessage}"> Private Message </a><span> | </span>
   <a href="#" onClick="${btnChatPublic}"> Public Chat </a><span> | </span>
+  <a href="#" onClick="${btnGunGraph}"> Gun Graph</a><span> | </span>
   <a href="#" onClick="${btnTestLab}"> Test Lab </a><span> | </span>
   </div>`;
 }
@@ -859,41 +869,106 @@ const PagePublicChat = () =>{
   </div>`;
 }
 // https://github.com/Lightnet/gunjstrustsharekey/blob/master/client.js#L640
-const aliasContacts = () =>{
+const aliasContacts = (props) =>{
 
   const [pubKey, setPublicKey] = createSignal("")
+  const [status, setStatus] = createSignal("Idle")
+  const [contacts, setContacts] = createSignal([])
+  const [contactID, setContactID] = createSignal("")
 
   function inputPublicKey(e){
     setPublicKey(e.target.value)
+    console.log("typing...")
+    if(e.target.value != "None" && e.target.value.length !== 0){
+      setStatus("...")
+      CheckPublicKey(e.target.value)
+    }
+  }
+
+  async function CheckPublicKey(_pub){
+    if(!_pub){
+      //console.log("EMPTY!")
+      setStatus("EMPTY!")
+			return;
+		}
+    let find = gun.user(_pub);
+    console.log(find)
+    let who = await find.then() || {};//get alias information
+    if(!who.alias){//check for alias from gun user
+      setStatus('No Alias!')
+			return;
+		}
+    setStatus('Found! ' + who.alias)
+    if(typeof props.onChange === 'function'){
+      props.onChange(_pub)
+    }
   }
 
   async function clickAddContact(e){
-    let _publickey = (publicKey() || '').trim();
+    let _publickey = (pubKey() || '').trim();
     if(!_publickey){console.log("Public Key EMPTY!");return;}
     let user = gun.user();
     let to = gun.user(_publickey);//get alias
     let who = await to.then() || {};//get alias data
     if(!who.alias){console.log("No Alias!");return;}
-    user.get("contacts").get(_publickey).put({alias:who.alias});
+    //need encrypt contact?
+    console.log(who)
+    const uid = String.random(32);
+    user.get("contacts").get(uid).put({alias:who.alias,pub:_publickey});
+    setContacts(state=>[...state,{id:uid,name:who.alias,pub:_publickey}])
   }
 
   async function clickRemoveContact(e){
-    let _publickey = (publicKey() || '').trim();
+    let _publickey = (pubKey() || '').trim();
     if(!_publickey){console.log("Public Key EMPTY!");return;}
     let user = gun.user();
-    let to = gun.user(_publickey);//get alias
-    let who = await to.then() || {};//get alias data
-    if(!who.alias){console.log("No Alias!");return;}
-    user.get("contacts").get(_publickey).put(null);
+    let userData = contacts().find(item=>item.pub==_publickey)
+    console.log(userData)
+    user.get("contacts").get(userData.id).put(null);
+    setContacts(state=>state.filter(item=>item.pub!==_publickey))
+
+    //let to = gun.user(_publickey);//get alias
+    //let who = await to.then() || {};//get alias data
+    //if(!who.alias){console.log("No Alias!");return;}
+    //user.get("contacts").get(_publickey).put(null);
   }
 
+  function selectContact(event){
+    console.log("SELECT Contact", event.target.value)
+    let pubID ="";
+    pubID=event.target.value;
+    if(event.target.value == "none"){
+      pubID="";
+    }
+    setContactID(pubID)
+    setPublicKey(pubID)
+    if(typeof props.onChange === 'function'){
+      props.onChange(pubID)
+    }
+  }
+  //> ${item.pub}
+  const contactList = createMemo(() => contacts().map(item=>html`<option id="${item.id}" value="${item.pub}">${item.name} </option>`));
+
+  onMount(()=>{
+    let user = gun.user();
+    user.get('contacts').once().map().once((data,key)=>{
+      console.log(data)
+      console.log(key)
+      if(data !=null && key.length == 32 && data?.pub != null){
+        setContacts(state=>[...state,{id:key,name:data.alias,pub:data.pub}])
+      }
+    })
+  })
+
   return html`<span>
-    <select>
-      <option> NONE </option>
+    <select value="${contactID}" onChange="${selectContact}">
+      <option value="none"> NONE </option>
+      ${contactList}
     </select>
     <input value="${pubKey}" onInput="${inputPublicKey}" />
     <button onClick="${clickAddContact}"> Add </button>
     <button onClick="${clickRemoveContact}"> Remove </button>
+    <label>Status: ${status}</label>
   </span>`;
 }
 
@@ -903,12 +978,15 @@ const PagePrivateMessage = () =>{
   const [publicKey, setPublicKey] = createSignal("")
   const [who, setWho] = createSignal("")
 
-  let gunprivatechat;
-  let UIdec;
+  let UIdec; //for message decode key
   let refPublicMessages;
+
+  let userMessage;
+  let toMessage;
 
   async function inputMessage(event){
     console.log("TYPE...")
+    setMessage(event.target.value)
     if(event.key == "Enter"){
       sendPrivateMessage();
     }
@@ -936,27 +1014,43 @@ const PagePrivateMessage = () =>{
   }
 
   async function viewPrivateMessages(){
+    if(userMessage!=null){
+      userMessage.off()
+    }
+    if(toMessage!=null){
+      toMessage.off()
+    }
     let user = gun.user();
     if(!user.is){ return }//check if user exist
     //messages = [];
-    CleanMessages();
+    //CleanMessages();
     let pub = (publicKey() || '').trim();
     if(!pub) return;//check if not id empty
     let to = gun.user(pub);//get alias
     let who = await to.then() || {};//get alias data
     if(!who.alias){
-        console.log("No Alias!");
-        //$('#mwho').text("who?");
-        setWho("No Alias!")
-        return;
+      console.log("No Alias!");
+      //$('#mwho').text("who?");
+      setWho("No Alias!")
+      return;
     }
     //$('#mwho').text(who.alias);
     setWho(who.alias)
     UIdec = await Gun.SEA.secret(who.epub, user._.sea); // Diffie-Hellman
-    user.get('messages').get(pub).map().once((data,id)=>{
+    //user.get('messages').get(pub).map().once((data,id)=>{
+      //UI(data,id,user.is.alias)
+    //});
+    //to.get('messages').get(user._.sea.pub).map().once((data,id)=>{
+      //UI(data,id,who.alias)
+    //});
+
+    userMessage = user.get('messages').get(pub);
+    userMessage.map().once((data,id)=>{
       UI(data,id,user.is.alias)
     });
-    to.get('messages').get(user._.sea.pub).map().once((data,id)=>{
+
+    toMessage = to.get('messages').get(user._.sea.pub);
+    toMessage.map().once((data,id)=>{
       UI(data,id,who.alias)
     });
   }
@@ -987,13 +1081,28 @@ const PagePrivateMessage = () =>{
   })
 
   onCleanup(()=>{
-    
+    if(userMessage!=null){
+      userMessage.off()
+    }
+    if(toMessage!=null){
+      toMessage.off()
+    }
   })
+
+  function onSelectPub(value){
+    console.log("value ID:",value)
+    setPublicKey(value)
+    refPublicMessages.replaceChildren();
+    let divInit = document.createElement('div')
+    divInit.append('Init Message!')
+    refPublicMessages.appendChild(divInit)
+    viewPrivateMessages();
+  }
 
   return html`<div style="height:100vh;width:100%">
     ${PageNavMenu()}
     <div style="height:calc(100vh - 18px);width:100%">
-      <label> Public Chat </label>
+      <label> Private Message </label> ${aliasContacts({onChange:onSelectPub})}
       <div id="refPublicMessages" style="background-color: darkgray;overflow-y: scroll; height:calc(100vh - 58px);">
         Not Init.
       </div>
@@ -1053,6 +1162,61 @@ const Modal = (props) =>{
   <div>
     ${message()}
   </div>
+  </div>`;
+}
+
+const GunNode = (props) =>{
+
+  const [nodeList, setNodeList] = createSignal([])
+  //console.log(props)
+
+  let node;
+  //let nodeList=[]
+
+  if(props.node){
+    node=props.node
+    //console.log("NODE:",props.node)
+    node.once().map().once((data,key)=>{
+      console.log(key)
+      console.log(data)
+      //nodeList.push(key)
+      setNodeList(state=>[...state,{id:key, value:data}])
+    })
+  }
+
+  const Glist = createMemo(() => nodeList().map(item=>
+    html`<li id="${item.id}"> ${item.id}: ${item.value} </li>`
+  ));
+  //${GunNode({node:node.get(item)})}
+
+  return html`<ul>
+  ${Glist}
+  </ul>`;
+}
+
+const PageGunGraph = () =>{
+  console.log(gun)
+
+  function getGraph(){
+    //for (const key in gun._.graph) {
+      //console.log(key)
+      //if (Object.hasOwnProperty.call(gun._.graph, key)) {
+        //const element = gun._.graph[key];
+        //console.log(element)
+      //}
+    //}
+    let dataList = [];
+    Object.entries(gun._.graph).forEach(([key, value]) => {
+      //console.log(`${key} ${value}`); // "a 5", "b 7", "c 9"
+      dataList.push(html`<li id="${key}">${key} ${GunNode({node:gun.get(key)})} </li>`);
+    });
+    //console.log(dataList)
+    return html`<ul>${dataList}</ul>`
+  }
+
+  return html`<div>
+  ${PageNavMenu()}
+  ${getGraph()}
   </div>`;
 }
 
