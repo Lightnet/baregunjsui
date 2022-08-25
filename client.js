@@ -77,6 +77,9 @@ const PageNavMenu = () =>{
 const PageLogin = () => {
   const [alias, setAlias] = createSignal("test")
   const [passphrase, setPassphrase] = createSignal("12345678")
+  const [pair, setPair] = createSignal(null)
+  const [textPair, setTextPair] = createSignal("")
+  const [isPair, setIsPair] = createSignal(false)
 
   function inputAlias(e){setAlias(e.target.value)}
   function inputPassphrase(e){setPassphrase(e.target.value)}
@@ -85,14 +88,25 @@ const PageLogin = () => {
     //console.log(alias())
     //console.log(passphrase())
     let user = gun.user();
-    user.auth(alias(), passphrase(),(ack)=>{//user login username and password
-      if(ack.err){
-        console.log(ack.err)
-        return;
-      }
-      dispose()
-      dispose = render(PageAccount, document.getElementById('app'));
-    });
+    if(isPair()){
+      user.auth(pair(),(ack)=>{//user login pair
+        if(ack.err){
+          console.log(ack.err)
+          return;
+        }
+        dispose()
+        dispose = render(PageAccount, document.getElementById('app'));
+      });
+    }else{
+      user.auth(alias(), passphrase(),(ack)=>{//user login username and password
+        if(ack.err){
+          console.log(ack.err)
+          return;
+        }
+        dispose()
+        dispose = render(PageAccount, document.getElementById('app'));
+      });
+    }
   }
 
   function btnSignUp(){
@@ -105,25 +119,61 @@ const PageLogin = () => {
     dispose = render(PageForgot, document.getElementById('app'));
   }
 
+  async function btnGeneratePair(){
+    let _pair= await Gun.SEA.pair();
+    console.log(_pair)
+    setPair(_pair)
+    setTextPair(JSON.stringify(_pair))
+  }
+
+  const displayType = createMemo(() => {
+    if(isPair()){
+      return html`
+      <tr>
+        <td>
+          <button onClick="${btnGeneratePair}">Generate Pair</button>
+        </td>
+      </tr>
+      <tr>
+      <td>
+        <label>SEA Pair:</label>
+      </td>
+      <td>
+        <textarea value="${textPair}" onInput="${inputAlias}" placeholder="JSON String"/>
+      </td>
+    </tr>`;
+    }else{
+      return html`<tr>
+      <td>
+        <label>Alias:</label>
+      </td>
+      <td>
+        <input value="${alias}" onInput="${inputAlias}"/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label>Passphrase:</label>
+      </td><td>
+        <input value="${passphrase()}" onInput="${inputPassphrase}"/>
+      </td>
+    </tr>`;
+    }
+    
+  });
+
+  const isCheckPair =  createMemo(() => isPair());
+
+  function togglePair(){
+    setIsPair(state=>!state)
+  }
+
   return html`<div>
-    <label>Login</label>
+    <label>Login</label> <span> | </span>
+    <label> SEA Pair <input type="checkbox" checked="${isCheckPair}" onClick="${togglePair}"> </label>
     <table>
       <tbody>
-        <tr>
-          <td>
-            <label>Alias:</label>
-          </td>
-          <td>
-            <input value="${alias()}" onInput="${inputAlias}"/>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label>Passphrase:</label>
-          </td><td>
-            <input value="${passphrase()}" onInput="${inputPassphrase}"/>
-          </td>
-        </tr>
+        ${displayType}
         <tr>
           <td colspan="2">
             <button onClick="${btnLogin}">Login</button>
@@ -165,12 +215,19 @@ const PageAccountMenu = (props) =>{
 }
 
 const PageAccount = (props) =>{
+
   return html`<div>
   ${PageNavMenu()}
   ${PageAccountMenu()}
-  ${PageProfile()}
+  <br/>
+  ${PageAliasInfo()}
+  <br/>
+  ${PageProfile()}  
+  <br/>
+  ${PageSearchProfile()}
   </div>`;
 }
+//${PageSearchProfile()}
 
 const PageSignUp = () => {
   const [alias, setAlias] = createSignal("test")
@@ -330,41 +387,158 @@ const PageForgot = () => {
   </div>`;
 }
 
-const PageProfile = () =>{
+const PageAliasInfo = () =>{
   let user = gun.user();
-  //console.log(user)
   const [alias, setAlias] = createSignal(user?.is?.alias || "Guest")
   const [publicKey, setPublicKey] = createSignal(user?.is?.pub || "")
+  const [toggleKey, setToggleKey] = createSignal(true)
 
   function copyPubKey(){
     console.log("KEY:",publicKey())
     navigator.clipboard.writeText(publicKey());
   }
 
-  //${PageNavMenu()}
+  function togglePubKey(){
+    console.log("toggle")
+    setToggleKey(state=>!state)
+  }
+
+  const isExpand = createMemo(() =>{//watch variable change
+    if(toggleKey()==true){
+      return "-"
+    }else{
+      return "+"
+    }
+  });
+
+  const ShowPubKey = createMemo(() =>{//watch variable change
+    if(toggleKey()==true){
+      return String(publicKey())
+    }else{
+      return "Hidden"
+    }
+  });
+
   return html`<div>
-  <div>
     <label>Alias: ${alias}</label><br/>
-    <label onClick="${copyPubKey}">Public Key: ${publicKey}</label><br/>
+    <label onClick="${copyPubKey}">Public Key:</label>
+    <input value="${ShowPubKey}" readonly />
+    <label onClick="${togglePubKey}">[${isExpand}]</label>
+    <label onClick="${copyPubKey}">[copy]</label> 
     <br/>
-    ${PageSearchProfile()}
+  </div>`;
+}
+
+const PageProfile = () =>{
+  
+  const [alias, setAlias] = createSignal("")
+  const [born, setBorn] = createSignal("")
+  const [education, setEducation] = createSignal("")
+  const [skills, setSkills] = createSignal("")
+
+  function getProfileParam(_name){
+    return new Promise((resolve,reject)=>{
+      let user = gun.user();
+      if(!user.is){ return reject(null)} //check for user auth
+      user.get('profile').get(_name).once((data)=>{
+        //console.log(data);
+        resolve(data)
+      })
+    })
+  }
+  
+  function inputProfileParam(event){
+    //console.log("typing...")
+    //console.log(event.target.name)
+    if(event.target.name){
+      if (event.keyCode == 13) {//enter key
+        //console.log("Enter...")
+        let user = gun.user();
+        user.get('profile').get(event.target.name).put(String(event.target.value),ack=>{
+          if(ack.err){
+            console.log(`Profile save ${event.target.name} error!`)
+            return;
+          }
+					console.log(ack);
+          console.log(`Profile save ${event.target.name}!`)
+				});
+        return false;
+      }
+    }
+  }
+
+  onMount(async ()=>{
+    setAlias(await getProfileParam('alias'))
+    setBorn(await getProfileParam('born'))
+    setEducation(await getProfileParam('education'))
+    setSkills(await getProfileParam('skills'))
+  })
+
+  return html`<div>
+    <label>Alias:</label> <input name="alias" value=${alias} onKeyUp="${inputProfileParam}" /><br/>
+    <label>Born:</label> <input name="born" value=${born} onKeyUp="${inputProfileParam}" /><br/>
+    <label>Education:</label> <input name="education" value=${education} onKeyUp="${inputProfileParam}" /><br/>
+    <label>Skills:</label> <input name="skills" value=${skills} onKeyUp="${inputProfileParam}" /><br/>
   </div>`;
 }
 
 const PageSearchProfile = () =>{
   //let user = gun.user();
   //console.log(user)
-  const [searchPublicKey, setSearchPublicKey] = createSignal("")
+  const [publicKey, setPublicKey] = createSignal("")
+  const [status, setStatus] = createSignal("Idle")
 
+  const [name, setName] = createSignal("")
   const [alias, setAlias] = createSignal("")
   const [born, setBorn] = createSignal("")
   const [education , setEducation ] = createSignal("")
   const [skills, setSkills] = createSignal("")
+
+  async function searchPublicKey(event){
+    setPublicKey(event.target.value)
+    setStatus("checking...")
+    let pub = (publicKey() || "").trim()
+    if(!pub){
+      console.log("EMPTY!")
+      setStatus("EMPTY!")
+			return;
+		}
+    var find = gun.user(pub);
+    //console.log(find);
+    let who = await find.then() || {};//get alias information
+    //console.log(who);
+    if(!who.alias){//check for alias from gun user
+      setStatus('No Alias!')
+			return;
+		}else{
+      //console.log(who)
+      setName(who.alias)
+      setStatus('Found! ' + who.alias)
+		}
+    find.get('profile').map().once((data, key)=>{
+      //console.log(data)
+      //console.log(key)
+      if(key=="alias"){
+        setAlias(String(data))
+      }
+      if(key=="born"){
+        setBorn(String(data))
+      }
+      if(key=="education"){
+        setEducation(String(data))
+      }
+      if(key=="skills"){
+        setSkills(String(data))
+      }
+    });
+
+  }
   
   //${PageNavMenu()}
   return html`<div>
   <div>
-    <label>Search Public Key:</label> <input value="${searchPublicKey}" />  <br/>
+    <label>Search Public Key:</label> <input value="${publicKey}" onInput="${searchPublicKey}"/> <label>Status: ${status}</label> <br/>
+    <label>Name: </label> <input value="${name}" /><br/>
     <label>Alias: </label> <input value="${alias}" /><br/>
     <label>Born:</label> <input value="${born}" /><br/>
     <label>Education</label> <input value="${education}" />  <br/>
@@ -387,7 +561,7 @@ const PageChangePassphrase = () =>{
     user.auth(user.is.alias, oldPassphrase(), (ack) => {//user auth call
       //console.log(ack);
       const check = ack.err || "Saved!";//check if there error else saved message.
-      console.log(check);
+      //console.log(check);
       //setSatus(_status);
       setSatus(check);
       //modalmessage(status);
@@ -396,7 +570,7 @@ const PageChangePassphrase = () =>{
 
   function btnCancel(event){
     dispose();
-    dispose = render(PageProfile, document.getElementById('app'));
+    dispose = render(PageAccount, document.getElementById('app'));
   }
 
   return html`<div>
@@ -907,7 +1081,7 @@ const ListArrayItems = (props) =>{
   </div>`;
 }
 
-
+// TEST AREA
 const PageTestLab = (props) =>{
 
   const [message, setMessage] = createSignal(props?.message || "None")
@@ -919,8 +1093,10 @@ const PageTestLab = (props) =>{
   </div>`;
 }
 
+// BLANK COMPONENT
 const PageBlank = (props) =>{
-  const [message, setMessage] = createSignal(props.message || "None")
+  //const [message, setMessage] = createSignal(props?.message || "None")
+
   return html`<div>
   </div>`;
 }
